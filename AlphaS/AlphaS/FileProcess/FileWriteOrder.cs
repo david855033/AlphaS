@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlphaS.Core
+namespace AlphaS.FileProcess
 {
-    class StockInfomation
+    internal class FileWriteOrder
     {
-        string ID;
-        string name;
-        string type;
+        public string filepath;
+        public string content;
     }
 }

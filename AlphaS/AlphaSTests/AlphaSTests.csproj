@@ -51,7 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Core\CoreTests.cs" />
+    <Compile Include="FileProcess\FileWriterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +59,10 @@
       <Project>{01FB8879-9727-4447-943F-7C304FA007BC}</Project>
       <Name>AlphaS</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Core\" />
+    <Folder Include="Setting\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
