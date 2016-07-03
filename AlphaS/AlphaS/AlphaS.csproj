@@ -55,9 +55,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FileProcess\IFileWriter.cs" />
+    <Compile Include="Forms\StockListWindow.xaml.cs">
+      <DependentUpon>StockListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Setting\ISettingManager.cs" />
     <Compile Include="Setting\SettingManager.cs" />
+    <Compile Include="DataSet\DataSet.cs" />
+    <Compile Include="StaticClass.cs" />
     <Compile Include="StockList\StockListManager.cs" />
+    <Page Include="Forms\StockListWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -68,8 +77,6 @@
     </Compile>
     <Compile Include="Core\Core.cs" />
     <Compile Include="StockList\StockInfomation.cs" />
-    <Compile Include="FileProcess\FileWriteOrder.cs" />
-    <Compile Include="FileProcess\FileWriter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

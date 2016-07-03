@@ -4,19 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlphaS.FileProcess;
 namespace AlphaS.Settings
 {
-    public class SettingManager
+    public class SettingManager : ISettingManager
     {
         readonly string SETTING_FILE_PATH;
-        public IFileWriter fileWriter = new FileWriter();
         public SettingManager(string settingFilePath)
         {
             SETTING_FILE_PATH = settingFilePath;
+            loadSettings();
         }
 
         Dictionary<string, string> settings = new Dictionary<string, string>();
+
         private void loadSettings()
         {
             bool isSettingFileExist = File.Exists(SETTING_FILE_PATH);
@@ -32,6 +32,7 @@ namespace AlphaS.Settings
                 }
             }
         }
+
         public string getSetting(string fieldName)
         {
             if (settings.ContainsKey(fieldName))
@@ -40,6 +41,7 @@ namespace AlphaS.Settings
             }
             return "";
         }
+
         public void saveSetting(string fieldName, string Content)
         {
             if (settings.ContainsKey(fieldName))
@@ -56,8 +58,10 @@ namespace AlphaS.Settings
             {
                 newContent.AppendLine(s.Key + "=" + s.Value);
             }
-
-            fileWriter.WriteFile(SETTING_FILE_PATH, newContent.ToString());
+            using (var sw = new StreamWriter(SETTING_FILE_PATH, false, Encoding.Default))
+            {
+                sw.Write(newContent.ToString());
+            }
         }
 
 

@@ -3,21 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using AlphaS.DataSetNS;
 
 namespace AlphaS.StockList
 {
     public class StockListManager
     {
-        readonly string STOCKLIST_FILE_PATH;
-        public readonly List<StockInfomation> stockList;
-        public StockListManager(string stockListFilePath)
-        {
-            STOCKLIST_FILE_PATH = stockListFilePath;
-        }
-        private void loadStockList()
-        {
+        public List<StockInfomation> stockList = new List<StockInfomation>();
 
+        public void loadStockList(string StockListFilePath)
+        {
+            DataSet stockData = new DataSet();
+            stockData.LoadData(StockListFilePath);
+            foreach (var row in stockData.DataRow)
+            {
+                stockList.Add(new StockInfomation(row, stockData.index));
+            }
         }
-        
+
     }
 }
