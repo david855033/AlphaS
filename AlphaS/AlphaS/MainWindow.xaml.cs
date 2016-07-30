@@ -44,6 +44,7 @@ namespace AlphaS
         }
         private void Window_Unload(object sender, RoutedEventArgs e) //結束所有子視窗
         {
+            Core.closeAllWindow = true;
             foreach (var w in windowList)
             {
                 Core.settingManager.saveSetting($"{w.GetType()}isVisible", w.IsVisible.ToString());

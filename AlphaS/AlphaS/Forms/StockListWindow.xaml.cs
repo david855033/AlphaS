@@ -28,6 +28,7 @@ namespace AlphaS.Forms
             InitializeComponent();
             this.Left = Core.settingManager.getSetting("StockListWindowPostitionLeft").getIntFromString();
             this.Top = Core.settingManager.getSetting("StockListWindowPostitionTop").getIntFromString();
+            loadStockList(Core.settingManager.getSetting("StockListPath"));
         }
 
         private void LoadStockList(object sender, RoutedEventArgs e)
@@ -46,16 +47,28 @@ namespace AlphaS.Forms
             if (openFileDialog.ShowDialog() == true)
             {
                 Core.settingManager.saveSetting("StockListDefaultFolder", openFileDialog.FileName.getFileFolderFromPath());
-                Core.stockListManager.loadStockList(openFileDialog.FileName);
-                stockListView.ItemsSource = Core.stockListManager.stockList;
-                stockListView.Items.Refresh();
+                Core.settingManager.saveSetting("StockListPath", openFileDialog.FileName);
+                loadStockList(openFileDialog.FileName);
             }
+        }
+
+        private void loadStockList(string fileName)
+        {
+            Core.stockListManager.loadStockList(fileName);
+            pathTextBlock.Text = fileName;
+            stockListView.ItemsSource = Core.stockListManager.stockList;
+            stockListView.Items.Refresh();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Core.settingManager.saveSetting("StockListWindowPostitionLeft", this.Left.ToString());
             Core.settingManager.saveSetting("StockListWindowPostitionTop", this.Top.ToString());
+            if (!Core.closeAllWindow)
+            {
+                this.Hide();
+                e.Cancel = true;
+            }
         }
     }
 }

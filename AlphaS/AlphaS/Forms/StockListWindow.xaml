@@ -10,7 +10,7 @@
         <StackPanel>
             <DockPanel Height="20">
                 <Button Margin="1" Click="LoadStockList">Select Stock List</Button>
-                <TextBlock Margin="1">[path]</TextBlock>
+                <TextBox x:Name="pathTextBlock" Margin="1" IsReadOnly="True">[path]</TextBox>
             </DockPanel>
             <ListView x:Name="stockListView" Margin="1"  Height="250">
                 <ListView.View>

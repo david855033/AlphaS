@@ -19,6 +19,8 @@ namespace AlphaS.CoreNS
 
         public static readonly StockListManager stockListManager = new StockListManager();
 
+        public static bool closeAllWindow=false;
+
         static Core()
         {
 
