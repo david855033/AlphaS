@@ -28,7 +28,7 @@ namespace AlphaS.Forms
             InitializeComponent();
             this.Left = Core.settingManager.getSetting("StockListWindowPostitionLeft").getIntFromString();
             this.Top = Core.settingManager.getSetting("StockListWindowPostitionTop").getIntFromString();
-            loadStockList(Core.settingManager.getSetting("StockListPath"));
+            loadStockListFromFilePath(Core.settingManager.getSetting("StockListPath"));
         }
 
         private void LoadStockList(object sender, RoutedEventArgs e)
@@ -48,15 +48,15 @@ namespace AlphaS.Forms
             {
                 Core.settingManager.saveSetting("StockListDefaultFolder", openFileDialog.FileName.getFileFolderFromPath());
                 Core.settingManager.saveSetting("StockListPath", openFileDialog.FileName);
-                loadStockList(openFileDialog.FileName);
+                loadStockListFromFilePath(openFileDialog.FileName);
             }
         }
 
-        private void loadStockList(string fileName)
+        private void loadStockListFromFilePath(string fileName)
         {
             Core.stockListManager.loadStockList(fileName);
             pathTextBlock.Text = fileName;
-            stockListView.ItemsSource = Core.stockListManager.stockList;
+            stockListView.ItemsSource = Core.stockListManager.getStockList();
             stockListView.Items.Refresh();
         }
 

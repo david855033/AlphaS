@@ -1,0 +1,30 @@
+﻿<Window x:Class="AlphaS.Forms.BasicDailyDataWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AlphaS.Forms"
+        mc:Ignorable="d"
+        Title="BasicDailyDataWindow" Height="500" Width="500" ResizeMode="NoResize" Closing="Window_Closing">
+    <Grid>
+        <StackPanel>
+            <DockPanel>
+                <TextBlock Width="80">Stock</TextBlock>
+                <TextBox>Stock ID  name</TextBox>
+            </DockPanel>
+            <DockPanel>
+                <TextBlock Width="80">Year Month</TextBlock>
+                <TextBox>Year Month</TextBox>
+            </DockPanel>
+            <DockPanel>
+                <Button Click="Button_Navigate_Click">navigate</Button>
+            </DockPanel>
+            <WebBrowser x:Name="webBrowser" Height="200">
+                
+            </WebBrowser>
+            <TextBlock>Acquire Information</TextBlock>
+            
+        </StackPanel>
+        
+    </Grid>
+</Window>

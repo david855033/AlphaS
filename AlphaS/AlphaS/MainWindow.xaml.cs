@@ -21,8 +21,7 @@ namespace AlphaS
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<Window> windowList = new List<Window>();
-        StockListWindow stockListWindow;
+        Dictionary<string,Window> windowList = new Dictionary<string, Window> ();
 
         public MainWindow()
         {
@@ -30,40 +29,53 @@ namespace AlphaS
             this.Left = Core.settingManager.getSetting("MainwindowPostitionLeft").getIntFromString();
             this.Top = Core.settingManager.getSetting("MainwindowPostitionTop").getIntFromString();
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e) //初始化所有子視窗
         {
-            stockListWindow = new StockListWindow(this);
-            windowList.Add(stockListWindow);
-            foreach (var w in windowList)
+           windowList.Add("StockListWindow", new StockListWindow(this));
+           windowList.Add("BasicDailyDataWindow", new BasicDailyDataWindow(this));
+
+            foreach (var pair in windowList)
             {
-                if (Core.settingManager.getSetting($"{w.GetType()}isVisible") == "True")
+                if (Core.settingManager.getSetting($"{pair.Key}isVisible") == "True")
                 {
-                    stockListWindow.Show();
+                    pair.Value.Show();
                 }
             }
         }
+        
         private void Window_Unload(object sender, RoutedEventArgs e) //結束所有子視窗
         {
             Core.closeAllWindow = true;
-            foreach (var w in windowList)
+            foreach (var pair in windowList)
             {
-                Core.settingManager.saveSetting($"{w.GetType()}isVisible", w.IsVisible.ToString());
-                w.Close();
+                Core.settingManager.saveSetting($"{pair.Key}isVisible", pair.Value.IsVisible.ToString());
+                pair.Value.Close();
             }
             Core.settingManager.saveSetting("MainwindowPostitionLeft", this.Left.ToString());
             Core.settingManager.saveSetting("MainwindowPostitionTop", this.Top.ToString());
         }
 
-        private void toggleStockList(object sender, RoutedEventArgs e)
+        private void toggleWindow(string windowName)
         {
-            if (stockListWindow.IsVisible)
+            if (windowList[windowName].IsVisible)
             {
-                stockListWindow.Hide();
+                windowList[windowName].Hide();
             }
             else
             {
-                stockListWindow.Show();
+                windowList[windowName].Show();
             }
+        }
+
+        private void toggleStockList(object sender, RoutedEventArgs e)
+        {
+            toggleWindow("StockListWindow");
+        }
+
+        private void toggleBasicDailyData(object sender, RoutedEventArgs e)
+        {
+            toggleWindow("BasicDailyDataWindow");
         }
     }
 }

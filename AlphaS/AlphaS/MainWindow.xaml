@@ -9,6 +9,7 @@
     <Grid>
         <StackPanel VerticalAlignment="Center">
             <Button Height="20" Click="toggleStockList">toggle stock list window</Button>
+            <Button Height="20" Click="toggleBasicDailyData">toggle Basic Daily Data window</Button>
         </StackPanel>
     </Grid>
 </Window>
