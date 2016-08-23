@@ -22,7 +22,7 @@
             <WebBrowser x:Name="webBrowser" Height="200">
                 
             </WebBrowser>
-            <TextBlock>Acquire Information</TextBlock>
+            <TextBlock x:Name="acquiredText">Acquire Information</TextBlock>
             
         </StackPanel>
         

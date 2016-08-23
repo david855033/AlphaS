@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AlphaS.CoreNS;
+using AlphaS.BasicDailyData;
 
 namespace AlphaS.Forms
 {
@@ -44,7 +45,14 @@ namespace AlphaS.Forms
 
         private void Button_Navigate_Click(object sender, RoutedEventArgs e)
         {
-            webBrowser.Navigate("http://www.twse.com.tw/ch/trading/exchange/FMSRFK/FMSRFKMAIN.php");
+            var basicDailyDataDownloader = new BasicDailyDataDownloader(webBrowser);
+            acquiredText.Text = BasicDailyDataInformation.ToTitle();
+            foreach (var line in basicDailyDataDownloader.getBasicDailyDataByYearMonth("1101", 101, 5))
+            {
+                acquiredText.Text += line + "\n";
+            }            
         }
+
+    
     }
 }
