@@ -28,15 +28,14 @@ namespace AlphaS.BasicDailyData
 
             webBrowser.LoadCompleted += loadComplete;
             webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
-            
             return BasicDailyDatas;
         }
 
         void loadComplete(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            System.Windows.MessageBox.Show("complete");
-
-            var HTMLDocument = webBrowser.Document;
+            dynamic HTMLDocument = webBrowser.Document;
+            var htmlText = HTMLDocument.documentElement.InnerHtml;
+            System.Windows.MessageBox.Show(htmlText);
         }
 
     }

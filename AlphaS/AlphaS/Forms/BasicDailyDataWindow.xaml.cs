@@ -50,7 +50,7 @@ namespace AlphaS.Forms
             foreach (var line in basicDailyDataDownloader.getBasicDailyDataByYearMonth("1101", 101, 5))
             {
                 acquiredText.Text += line + "\n";
-            }            
+            }
         }
 
     
