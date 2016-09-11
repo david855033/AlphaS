@@ -22,8 +22,8 @@
             <WebBrowser x:Name="webBrowser" Height="200">
                 
             </WebBrowser>
-            <TextBlock x:Name="acquiredText">Acquire Information</TextBlock>
-            
+            <TextBlock x:Name="acquiredText" Text="{Binding acquiredData}"/>
+
         </StackPanel>
         
     </Grid>

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AlphaS.CoreNS;
 using AlphaS.BasicDailyData;
+using System.Threading;
 
 namespace AlphaS.Forms
 {
@@ -22,12 +23,15 @@ namespace AlphaS.Forms
     public partial class BasicDailyDataWindow : Window
     {
         MainWindow mainWindow;
+        BasicDailyDataViewModel viewModel = new BasicDailyDataViewModel();
         public BasicDailyDataWindow(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
             InitializeComponent();
             this.Left = Core.settingManager.getSetting("BasicDailyDataWindowPostitionLeft").getIntFromString();
             this.Top = Core.settingManager.getSetting("BasicDailyDataWindowPostitionTop").getIntFromString();
+            this.DataContext = viewModel;
+            viewModel.acquiredData = "acquired data";
         }
 
     
@@ -46,11 +50,21 @@ namespace AlphaS.Forms
         private void Button_Navigate_Click(object sender, RoutedEventArgs e)
         {
             var basicDailyDataDownloader = new BasicDailyDataDownloader(webBrowser);
-            acquiredText.Text = BasicDailyDataInformation.ToTitle();
-            foreach (var line in basicDailyDataDownloader.getBasicDailyDataByYearMonth("1101", 101, 5))
-            {
-                acquiredText.Text += line + "\n";
-            }
+            viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
+            basicDailyDataDownloader.getBasicDailyDataByYearMonth("1101", 2016, 5);
+
+            var thread = new Thread(()=> {
+                while (basicDailyDataDownloader.working)
+                {
+                    Thread.Sleep(100);
+                }
+                MessageBox.Show("start to display data");
+                foreach (var line in basicDailyDataDownloader.BasicDailyDatas)
+                {
+                    viewModel.acquiredData += line + "\n";
+                }
+            });
+            thread.Start();
         }
 
     

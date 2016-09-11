@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="BasicDailyData\BasicDailyData.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataDownloader.cs" />
+    <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
     </Compile>
@@ -69,6 +70,7 @@
     <Compile Include="StaticClass.cs" />
     <Compile Include="StockList\IStockListManager.cs" />
     <Compile Include="StockList\StockListManager.cs" />
+    <Compile Include="ViewModelProtoType.cs" />
     <Page Include="Forms\BasicDailyDataWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
