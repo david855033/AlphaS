@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="BasicDailyData\BasicDailyData.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataDownloader.cs" />
+    <Compile Include="BasicDailyData\BasicDailyDataMission.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>

@@ -67,6 +67,8 @@ namespace AlphaS.Forms
             thread.Start();
         }
 
+
+
     
     }
 }

@@ -12,22 +12,54 @@ namespace AlphaS.BasicDailyData
 {
     abstract public class BasicDailyDataDownloaderProtoType
     {
-        abstract public void getBasicDailyDataByYearMonth(string ID, int year, int month);
+        abstract public void setMission(List<BasicDailyDataMission> mission);
+        abstract public void startMission();
+        abstract public List<BasicDailyDataInformation> getResult();
+        abstract public bool checkAllWorkDone();
     }
 
     public class BasicDailyDataDownloader : BasicDailyDataDownloaderProtoType
     {
         private WebBrowser webBrowser;
-        public bool working = true;
-        public List<BasicDailyDataInformation> BasicDailyDatas;
-
         public BasicDailyDataDownloader(WebBrowser webBrowser)
         {
             this.webBrowser = webBrowser;
-
         }
 
-        public override void getBasicDailyDataByYearMonth(string ID, int year, int month)
+
+        List<BasicDailyDataMission> missionList;
+        override public void setMission(List<BasicDailyDataMission> mission)
+        {
+            this.missionList = mission.ToList();
+            isAllWorkDone = false;
+        }
+
+        List<BasicDailyDataInformation> BasicDailyDatas;
+        public override List<BasicDailyDataInformation> getResult()
+        {
+            return BasicDailyDatas;
+        }
+
+        bool isAllWorkDone = false;
+        public override bool checkAllWorkDone()
+        {
+            return isAllWorkDone;
+        }
+
+        public bool working = false;
+        public override void startMission()
+        {
+            while (missionList.Count > 0)
+            {
+                BasicDailyDataMission currentMission = missionList.First();
+                getBasicDailyDataByYearMonth(currentMission);
+
+
+                missionList.Remove(currentMission);
+            }
+        }
+        
+        void getBasicDailyDataByYearMonth(BasicDailyDataMission currentMission)
         {
             working = true;
             BasicDailyDatas = new List<BasicDailyDataInformation>();
