@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlphaS.Forms"
         mc:Ignorable="d"
-        Title="BasicDailyDataWindow" Height="500" Width="500" ResizeMode="NoResize" Closing="Window_Closing">
+        Title="BasicDailyDataWindow" Height="800" Width="1000" ResizeMode="NoResize" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid>
         <StackPanel>
             <DockPanel>
@@ -19,9 +19,9 @@
             <DockPanel>
                 <Button Click="Button_Navigate_Click">navigate</Button>
             </DockPanel>
-            <WebBrowser x:Name="webBrowser" Height="200">
+            <Grid x:Name="webBrowserGrid" Height="500">
                 
-            </WebBrowser>
+            </Grid>
             <TextBlock x:Name="acquiredText" Text="{Binding acquiredData}"/>
 
         </StackPanel>

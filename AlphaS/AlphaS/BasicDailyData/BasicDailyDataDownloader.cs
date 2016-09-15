@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Navigation;
+using System.Reflection;
+using mshtml;
+using System.Windows.Forms;
 using System.Threading;
-using System.Windows;
-
+using System.Text.RegularExpressions;
 namespace AlphaS.BasicDailyData
 {
     abstract public class BasicDailyDataDownloaderProtoType
@@ -15,65 +13,109 @@ namespace AlphaS.BasicDailyData
         abstract public void setMission(List<BasicDailyDataMission> mission);
         abstract public void startMission();
         abstract public List<BasicDailyDataInformation> getResult();
-        abstract public bool checkAllWorkDone();
     }
 
     public class BasicDailyDataDownloader : BasicDailyDataDownloaderProtoType
     {
         private WebBrowser webBrowser;
-        public BasicDailyDataDownloader(WebBrowser webBrowser)
+        public BasicDailyDataDownloader(System.Windows.Forms.WebBrowser webBrowser)
         {
             this.webBrowser = webBrowser;
         }
-
+        private BasicDailyDataViewModel viewModel;
+        public void setViewModel(BasicDailyDataViewModel viewModel) { this.viewModel = viewModel; }
 
         List<BasicDailyDataMission> missionList;
         override public void setMission(List<BasicDailyDataMission> mission)
         {
             this.missionList = mission.ToList();
-            isAllWorkDone = false;
         }
 
-        List<BasicDailyDataInformation> BasicDailyDatas;
+        List<BasicDailyDataInformation> BasicDailyDatas = new List<BasicDailyDataInformation>();
         public override List<BasicDailyDataInformation> getResult()
         {
             return BasicDailyDatas;
         }
 
-        bool isAllWorkDone = false;
-        public override bool checkAllWorkDone()
-        {
-            return isAllWorkDone;
-        }
 
-        public bool working = false;
+        public bool webBrowserWorking = false;
+
         public override void startMission()
         {
-            while (missionList.Count > 0)
+            webBrowser.DocumentCompleted += loadComplete;
+            viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
+            Thread.Sleep(300);
+            webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+
+        }
+
+        BasicDailyDataMission currentMission;
+        void loadComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            var doc = webBrowser.Document;
+            if (currentMission != null)
             {
-                BasicDailyDataMission currentMission = missionList.First();
-                getBasicDailyDataByYearMonth(currentMission);
+                var tables = doc.GetElementsByTagName("table");
+                HtmlElement dataTable = tables[0];
+                foreach (HtmlElement table in tables)
+                {
+                    if (table.InnerHtml.Contains("各日成交資訊"))
+                    {
+                        dataTable = table;
+                        break;
+                    }
+                }
+                foreach (var data in analysisDataTable(dataTable.InnerHtml))
+                    viewModel.acquiredData += data.ToString();
+            }
+            if (missionList.Count > 0)
+            {
+                Thread.Sleep(1000);
+
+                currentMission = missionList.First();
 
 
+                var query_year = doc.GetElementById("query_year");
+                var query_month = doc.GetElementById("query_month");
+                var CO_ID = doc.GetElementById("CO_ID");
+                var query_button = doc.GetElementById("query-button");
+                CO_ID.InnerText = currentMission.ID;
+                foreach (HtmlElement opt in query_year.Children)
+                {
+                    if (opt.GetAttribute("value") == currentMission.year.ToString())
+                    {
+                        opt.SetAttribute("selected", "selected");
+                        break;
+                    }
+                }
+                foreach (HtmlElement opt in query_month.Children)
+                {
+                    if (opt.GetAttribute("value") == currentMission.month.ToString())
+                    {
+                        opt.SetAttribute("selected", "selected");
+                        break;
+                    }
+                }
+                query_button.InvokeMember("click");
+                viewModel.acquiredData += currentMission.ToString() + "\r\n";
+                Thread.Sleep(1000);
                 missionList.Remove(currentMission);
             }
-        }
-        
-        void getBasicDailyDataByYearMonth(BasicDailyDataMission currentMission)
-        {
-            working = true;
-            BasicDailyDatas = new List<BasicDailyDataInformation>();
-            webBrowser.LoadCompleted += loadComplete;
-            webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+            else
+            {
+                webBrowser.DocumentCompleted -= loadComplete;
+            }
         }
 
-        void loadComplete(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
-            var HTMLDocument = webBrowser.Document;
-            BasicDailyDatas.Add(new BasicDailyDataInformation());
-            working = false;
-            MessageBox.Show("work done");
+            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
+            var s = getStringBetweenTags(tableInnerHTML, "");
+            return result;
         }
-
+        string getStringBetweenTags(string input, string tag)
+        {
+            return Regex.Replace(input, @"<[^>]*>", string.Empty);
+        }
     }
 }

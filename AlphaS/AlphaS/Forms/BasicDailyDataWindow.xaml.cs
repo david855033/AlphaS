@@ -34,7 +34,7 @@ namespace AlphaS.Forms
             viewModel.acquiredData = "acquired data";
         }
 
-    
+
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -50,25 +50,30 @@ namespace AlphaS.Forms
         private void Button_Navigate_Click(object sender, RoutedEventArgs e)
         {
             var basicDailyDataDownloader = new BasicDailyDataDownloader(webBrowser);
-            viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
-            basicDailyDataDownloader.getBasicDailyDataByYearMonth("1101", 2016, 5);
-
-            var thread = new Thread(()=> {
-                while (basicDailyDataDownloader.working)
-                {
-                    Thread.Sleep(100);
-                }
-                MessageBox.Show("start to display data");
-                foreach (var line in basicDailyDataDownloader.BasicDailyDatas)
-                {
-                    viewModel.acquiredData += line + "\n";
-                }
-            });
-            thread.Start();
+            basicDailyDataDownloader.setViewModel(viewModel);
+            var missionList = new List<BasicDailyDataMission>()
+            {
+                new BasicDailyDataMission() { ID="1101",year=2016,month=1,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=2,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=3,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=4,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=5,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=6,type="A"},
+                new BasicDailyDataMission() { ID="1101",year=2016,month=7,type="A"}
+            };
+            basicDailyDataDownloader.setMission(missionList);
+            basicDailyDataDownloader.startMission();
         }
 
+        public static System.Windows.Forms.WebBrowser webBrowser = new System.Windows.Forms.WebBrowser();
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.Integration.WindowsFormsHost host = new System.Windows.Forms.Integration.WindowsFormsHost();
 
+            host.Child = webBrowser;
+            this.webBrowserGrid.Children.Add(host);
 
-    
+            webBrowser.ScriptErrorsSuppressed = true;
+        }
     }
 }

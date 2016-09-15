@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlphaS
 {
-    abstract class ViewModelProtoType: INotifyPropertyChanged
+    public abstract class ViewModelProtoType: INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name)

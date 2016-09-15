@@ -44,7 +44,7 @@ namespace AlphaS.BasicDailyData
             sb.Append("最低價\t");
             sb.Append("收盤價\t");
             sb.Append("漲跌價差\t");
-            sb.Append("成交筆數+\r\n");
+            sb.Append("成交筆數\r\n");
             return sb.ToString();           
         }
     }

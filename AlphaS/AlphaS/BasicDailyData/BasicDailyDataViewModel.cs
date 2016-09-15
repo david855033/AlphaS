@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AlphaS.BasicDailyData
 {
-    class BasicDailyDataViewModel:ViewModelProtoType
+    public class BasicDailyDataViewModel:ViewModelProtoType
     {
         private string _acquiredData;
         public string acquiredData
