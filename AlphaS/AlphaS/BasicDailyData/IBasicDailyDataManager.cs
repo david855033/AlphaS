@@ -11,6 +11,9 @@ namespace AlphaS.BasicDailyData
         void setBaseFolder(string path);
         string getBaseFolder();
         List<BasicDailyDataFileStatusInformation> getFileStatus(string ID);
-        
+        void saveFileStatus(string ID, List<BasicDailyDataFileStatusInformation> fileStatusToWrite);
+
+        List<BasicDailyDataInformation> getBasicDailyData(string ID);
+        void saveBasicDailyData(string ID, List<BasicDailyDataInformation> basicDailyDataToWrite);
     }
 }

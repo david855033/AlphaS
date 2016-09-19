@@ -52,6 +52,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BasicDailyData\BasicDailyDataFileStatusInformationTests.cs" />
+    <Compile Include="BasicDailyData\BasicDailyDataManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
