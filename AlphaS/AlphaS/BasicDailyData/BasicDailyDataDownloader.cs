@@ -39,7 +39,6 @@ namespace AlphaS.BasicDailyData
             return BasicDailyDatas;
         }
 
-
         public bool webBrowserWorking = false;
 
         public override void startMission()
@@ -72,7 +71,7 @@ namespace AlphaS.BasicDailyData
             }
             if (missionList.Count > 0)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
 
                 currentMission = missionList.First();
 
@@ -98,8 +97,7 @@ namespace AlphaS.BasicDailyData
                     }
                 }
                 query_button.InvokeMember("click");
-                viewModel.acquiredData += currentMission.ToString() + "\r\n";
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
                 missionList.Remove(currentMission);
             }
             else
@@ -128,7 +126,12 @@ namespace AlphaS.BasicDailyData
                     date = row[0].getDateTimeFromString().transferMKtoBC(),
                     dealedStock = row[1].getDecimalFromString(),
                     volume= row[2].getDecimalFromString(),
-                    open = row[3].getDecimalFromString()
+                    open = row[3].getDecimalFromString(),
+                    high = row[4].getDecimalFromString(),
+                    low = row[5].getDecimalFromString(),
+                    close = row[6].getDecimalFromString(),
+                    change = row[7].getDecimalFromString(),
+                    dealedOrder = row[8].getDecimalFromString()
                 };
                 result.Add(toAdd);
             }

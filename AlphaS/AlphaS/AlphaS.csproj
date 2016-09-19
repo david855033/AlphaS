@@ -60,10 +60,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BasicDailyData\BasicDailyDataFileStatusInformation.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataInformation.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataDownloader.cs" />
+    <Compile Include="BasicDailyData\BasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataMission.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
+    <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
     </Compile>

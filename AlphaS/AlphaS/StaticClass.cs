@@ -34,7 +34,7 @@ namespace AlphaS
         public static decimal getDecimalFromString(this string input, out bool success)
         {
             decimal result;
-            input = Regex.Replace(input, @"[^0-9.]", "");
+            input = Regex.Replace(input, @"[^0-9.-]", "");
             if (input == "")
             {
                 success = true;

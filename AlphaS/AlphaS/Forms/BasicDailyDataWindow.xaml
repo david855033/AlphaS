@@ -13,8 +13,8 @@
                 <TextBox>Stock ID  name</TextBox>
             </DockPanel>
             <DockPanel>
-                <TextBlock Width="80">Year Month</TextBlock>
-                <TextBox>Year Month</TextBox>
+                <Button>Analyze Data Bank</Button>
+                <TextBox></TextBox>
             </DockPanel>
             <DockPanel>
                 <Button Click="Button_Navigate_Click">navigate</Button>
@@ -22,8 +22,9 @@
             <Grid x:Name="webBrowserGrid" Height="500">
                 
             </Grid>
-            <TextBlock x:Name="acquiredText" Text="{Binding acquiredData}"/>
-
+            <TextBox x:Name="acquiredText" Text="{Binding acquiredData}" 
+                     VerticalScrollBarVisibility="Visible" Height="150"/>
+            
         </StackPanel>
         
     </Grid>
