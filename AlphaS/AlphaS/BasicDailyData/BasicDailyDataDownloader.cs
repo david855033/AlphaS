@@ -6,6 +6,8 @@ using mshtml;
 using System.Windows.Forms;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System;
+
 namespace AlphaS.BasicDailyData
 {
     abstract public class BasicDailyDataDownloaderProtoType
@@ -74,7 +76,6 @@ namespace AlphaS.BasicDailyData
 
                 currentMission = missionList.First();
 
-
                 var query_year = doc.GetElementById("query_year");
                 var query_month = doc.GetElementById("query_month");
                 var CO_ID = doc.GetElementById("CO_ID");
@@ -109,13 +110,69 @@ namespace AlphaS.BasicDailyData
 
         List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
-            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
-            var s = getStringBetweenTags(tableInnerHTML, "");
+            string s = getContentFromtbody(tableInnerHTML);
+            List<string> dataByRows = getListByTableRow(s);
+            List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
+            List<BasicDailyDataInformation> result = fillInBasicDailyDataInformation(dataByRowsAndCols);
+
             return result;
         }
-        string getStringBetweenTags(string input, string tag)
+
+        private List<BasicDailyDataInformation> fillInBasicDailyDataInformation(List<string[]> dataByRowsAndCols)
         {
-            return Regex.Replace(input, @"<[^>]*>", string.Empty);
+            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
+            foreach (var row in dataByRowsAndCols)
+            {
+                var toAdd = new BasicDailyDataInformation()
+                {
+                    date = row[0].getDateTimeFromString().transferMKtoBC(),
+                    dealedStock = row[1].getDecimalFromString(),
+                    volume= row[2].getDecimalFromString(),
+                    open = row[3].getDecimalFromString()
+                };
+                result.Add(toAdd);
+            }
+            return result;
+        }
+
+        string getContentFromtbody(string input)
+        {
+            var m = Regex.Match(input, @"<tbody>.*<\/tbody>");
+            if (m.Success)
+            {
+                var result = m.Value.Replace("<tbody>", "").Replace(@"<\/tbody>", "");
+                return result;
+            }
+            else
+            { return ""; }
+        }
+        List<string> getListByTableRow(string input)
+        {
+            var m = Regex.Match(input, @"<tr>.*?<\/tr>");
+            var resultList = new List<string>();
+            while (m.Success)
+            {
+                resultList.Add(m.Value.Replace("<tr>", "").Replace(@"<\/tr>", ""));
+                m = m.NextMatch();
+            }
+            return resultList;
+        }
+        List<string[]> splitRowContentIntoCols(List<string> input)
+        {
+            List<string[]> result = new List<string[]>();
+
+            foreach (var s in input)
+            {
+                var m = Regex.Match(s, @"<td[^>]*>.*?<\/td>");
+                var thisRow = new List<string>();
+                while (m.Success)
+                {
+                    thisRow.Add(Regex.Replace(m.Value, @"<td[^>]*>|<\/td>", ""));
+                    m = m.NextMatch();
+                }
+                result.Add(thisRow.ToArray());
+            }
+            return result;
         }
     }
 }

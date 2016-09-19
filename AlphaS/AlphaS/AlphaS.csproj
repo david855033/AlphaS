@@ -60,7 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BasicDailyData\BasicDailyData.cs" />
+    <Compile Include="BasicDailyData\BasicDailyDataInformation.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataDownloader.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataMission.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
