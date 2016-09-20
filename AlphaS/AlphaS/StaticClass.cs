@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlphaS
 {
-    static class StaticClass
+    public static class StaticClass
     {
         public static int getIntFromString(this string input)
         {
@@ -44,11 +44,6 @@ namespace AlphaS
             return result;
         }
 
-        public static DateTime transferMKtoBC(this DateTime input)
-        {
-            return input.AddYears(1911);
-        }
-
         public static DateTime getDateTimeFromString(this string input)
         {
             bool success = false;
@@ -59,6 +54,28 @@ namespace AlphaS
             DateTime result;
             success = DateTime.TryParse(input, out result);
             return result;
+        }
+
+        public static DateTime getDateTimeFromStringMK(this string input)
+        {
+            bool success = false;
+            return input.getDateTimeFromStringMK(out success);
+        }
+        public static DateTime getDateTimeFromStringMK(this string input, out bool success)
+        {
+            DateTime result;
+            int index = input.IndexOf('/');
+            if (index < 0) index = input.IndexOf('-');
+            int year = 0;
+            success = int.TryParse(input.Substring(0, index), out year);
+            if (success)
+            {
+                year += 1911;
+                input = year + input.Substring(index, input.Length - index);
+                success = DateTime.TryParse(input, out result);
+                return result;
+            }
+            return DateTime.MinValue;
         }
 
         public static string getFileFolderFromPath(this string input)

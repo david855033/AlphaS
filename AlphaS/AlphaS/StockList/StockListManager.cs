@@ -13,7 +13,7 @@ namespace AlphaS.StockList
     {
         List<StockInfomation> stockList = new List<StockInfomation>();
 
-        public IEnumerable getStockList()
+        public IEnumerable<StockInfomation> getStockList()
         {
             return stockList.ToArray();
         }

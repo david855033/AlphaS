@@ -32,12 +32,24 @@ namespace AlphaS.Forms
             this.Top = Core.settingManager.getSetting("BasicDailyDataWindowPostitionTop").getIntFromString();
             this.DataContext = viewModel;
             viewModel.acquiredData = "acquired data";
+            viewModel.startYear = Core.settingManager.getSetting("BasicDailyDataWindowStartYear");
+            viewModel.startMonth = Core.settingManager.getSetting("BasicDailyDataWindowStartMonth");
         }
 
+        public static System.Windows.Forms.WebBrowser webBrowser = new System.Windows.Forms.WebBrowser();
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.Integration.WindowsFormsHost host = new System.Windows.Forms.Integration.WindowsFormsHost();
+            host.Child = webBrowser;
+            this.webBrowserGrid.Children.Add(host);
+            webBrowser.ScriptErrorsSuppressed = true;
+        }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Core.settingManager.saveSetting("BasicDailyDataWindowPostitionLeft", this.Left.ToString());
             Core.settingManager.saveSetting("BasicDailyDataWindowPostitionTop", this.Top.ToString());
+            Core.settingManager.saveSetting("BasicDailyDataWindowStartYear", this.viewModel.startYear);
+            Core.settingManager.saveSetting("BasicDailyDataWindowStartMonth", this.viewModel.startMonth);
             if (!Core.closeAllWindow)
             {
                 this.Hide();
@@ -45,25 +57,28 @@ namespace AlphaS.Forms
             }
         }
 
+
         private void Button_Navigate_Click(object sender, RoutedEventArgs e)
         {
-            var basicDailyDataDownloader = new BasicDailyDataDownloader(webBrowser);
+            initializeDownloadMission();
+        }
+
+        private void initializeDownloadMission()
+        {
+            IBasicDailyDataDownloader basicDailyDataDownloader = new BasicDailyDataDownloader();
+            basicDailyDataDownloader.setWebBrowser(webBrowser);
             basicDailyDataDownloader.setViewModel(viewModel);
+
             IBasicDailyDataMissionListGenerator missionListGenerator = new BasicDailyDataMissionListGenerator();
-            var missionList = missionListGenerator.getMissionList();
+            missionListGenerator.setStartYear(viewModel.startYear.getIntFromString());
+            missionListGenerator.setStartMonth(viewModel.startMonth.getIntFromString());
+            missionListGenerator.setStockList(Core.stockListManager.getStockList());
+
+            var missionList = missionListGenerator.getMissionList(false);
+
             basicDailyDataDownloader.setMission(missionList);
             basicDailyDataDownloader.startMission();
         }
 
-        public static System.Windows.Forms.WebBrowser webBrowser = new System.Windows.Forms.WebBrowser();
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Forms.Integration.WindowsFormsHost host = new System.Windows.Forms.Integration.WindowsFormsHost();
-
-            host.Child = webBrowser;
-            this.webBrowserGrid.Children.Add(host);
-
-            webBrowser.ScriptErrorsSuppressed = true;
-        }
     }
 }

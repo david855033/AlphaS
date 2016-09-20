@@ -11,38 +11,36 @@ using AlphaS.CoreNS;
 
 namespace AlphaS.BasicDailyData
 {
-    abstract public class BasicDailyDataDownloaderProtoType
-    {
-        abstract public void setMission(List<BasicDailyDataMission> mission);
-        abstract public void startMission();
-        abstract public List<BasicDailyDataInformation> getResult();
-    }
-
-    public class BasicDailyDataDownloader : BasicDailyDataDownloaderProtoType
+    public class BasicDailyDataDownloader : IBasicDailyDataDownloader
     {
         private WebBrowser webBrowser;
-        public BasicDailyDataDownloader(System.Windows.Forms.WebBrowser webBrowser)
+        public void setWebBrowser(System.Windows.Forms.WebBrowser webBrowser)
         {
             this.webBrowser = webBrowser;
         }
+        public BasicDailyDataDownloader()
+        {
+
+        }
+
         private BasicDailyDataViewModel viewModel;
         public void setViewModel(BasicDailyDataViewModel viewModel) { this.viewModel = viewModel; }
 
         List<BasicDailyDataMission> missionList;
-        override public void setMission(List<BasicDailyDataMission> mission)
+        public void setMission(List<BasicDailyDataMission> mission)
         {
             this.missionList = mission.ToList();
         }
 
         List<BasicDailyDataInformation> BasicDailyDatas = new List<BasicDailyDataInformation>();
-        public override List<BasicDailyDataInformation> getResult()
+        public List<BasicDailyDataInformation> getResult()
         {
             return BasicDailyDatas;
         }
 
         public bool webBrowserWorking = false;
 
-        public override void startMission()
+        public void startMission()
         {
             webBrowser.DocumentCompleted += loadComplete;
             viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
@@ -176,7 +174,7 @@ namespace AlphaS.BasicDailyData
                 }
                 var toAdd = new BasicDailyDataInformation()
                 {
-                    date = row[0].getDateTimeFromString().transferMKtoBC(),
+                    date = row[0].getDateTimeFromStringMK(),
                     dealedStock = row[1].getDecimalFromString(),
                     volume = row[2].getDecimalFromString(),
                     open = row[3].getDecimalFromString(),

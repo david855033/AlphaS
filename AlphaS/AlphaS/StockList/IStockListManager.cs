@@ -10,6 +10,6 @@ namespace AlphaS.StockList
     public interface IStockListManager
     {
         void loadStockList(string StockListFilePath);
-        IEnumerable getStockList();
+        IEnumerable<StockInfomation> getStockList();
     }
 }

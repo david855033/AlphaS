@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AlphaS.BasicDailyData
 {
-    public class BasicDailyDataInformation:IComparable
+    public class BasicDailyDataInformation : IComparable
     {
         public DateTime date;
         public decimal dealedStock;
@@ -37,7 +37,7 @@ namespace AlphaS.BasicDailyData
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(date.ToString("yyyy-MM-dd") + "\t");
-            sb.Append(dealedStock.ToString() +"\t");
+            sb.Append(dealedStock.ToString() + "\t");
             sb.Append(volume.ToString() + "\t");
             sb.Append(open.ToString() + "\t");
             sb.Append(high.ToString() + "\t");
@@ -60,7 +60,7 @@ namespace AlphaS.BasicDailyData
             sb.Append("收盤價\t");
             sb.Append("漲跌價差\t");
             sb.Append("成交筆數");
-            return sb.ToString();           
+            return sb.ToString();
         }
 
         public int CompareTo(object obj)
