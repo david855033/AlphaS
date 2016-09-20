@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System;
+using AlphaS.CoreNS;
 
 namespace AlphaS.BasicDailyData
 {
@@ -66,15 +67,63 @@ namespace AlphaS.BasicDailyData
                         break;
                     }
                 }
-                foreach (var data in analysisDataTable(dataTable.InnerHtml))
-                    viewModel.acquiredData += data.ToString();
+                viewModel.acquiredData = currentMission.ToString() + "\r\n";
+                viewModel.acquiredData += BasicDailyDataInformation.ToTitle() + "\r\n";
+                var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
+                var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
+                var analyzedDataList = analysisDataTable(dataTable.InnerHtml);
+                foreach (var currentBasicDailyData in analyzedDataList)
+                {
+                    int index = basicDailyDataList.BinarySearch(currentBasicDailyData);
+                    if (index >= 0)
+                    {
+                        basicDailyDataList[index] = currentBasicDailyData;
+                    }
+                    else
+                    {
+                        basicDailyDataList.Insert(~index, currentBasicDailyData);
+                    }
+                    viewModel.acquiredData += currentBasicDailyData.ToString() + "\r\n";
+                }
+
+                var fileStatus = new FileStatus();
+                if (analyzedDataList.Count == 0)
+                {
+                    fileStatus = FileStatus.Null;
+                }
+                else if (DateTime.Now.Year == currentMission.year && DateTime.Now.Month == currentMission.month)
+                {
+                    fileStatus = FileStatus.Temp;
+                }
+                else
+                {
+                    fileStatus = FileStatus.Valid;
+                }
+                var currentFileStatus = new BasicDailyDataFileStatusInformation()
+                {
+                    month = currentMission.month.ToString(),
+                    year = currentMission.year.ToString(),
+                    dataCount = analyzedDataList.Count(),
+                    modifiedTime = DateTime.Now.ToString(),
+                    fileStatus = fileStatus
+                };
+                var indexFileStatus = fileStatusList.BinarySearch(currentFileStatus);
+                if (indexFileStatus >= 0)
+                {
+                    fileStatusList[indexFileStatus] = currentFileStatus;
+                }
+                else
+                {
+                    fileStatusList.Insert(~indexFileStatus, currentFileStatus);
+                }
+
+                Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
+                Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
             }
             if (missionList.Count > 0)
             {
                 Thread.Sleep(500);
-
                 currentMission = missionList.First();
-
                 var query_year = doc.GetElementById("query_year");
                 var query_month = doc.GetElementById("query_month");
                 var CO_ID = doc.GetElementById("CO_ID");
@@ -121,11 +170,15 @@ namespace AlphaS.BasicDailyData
             List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
             foreach (var row in dataByRowsAndCols)
             {
+                if (row.Length != 9)
+                {
+                    continue;
+                }
                 var toAdd = new BasicDailyDataInformation()
                 {
                     date = row[0].getDateTimeFromString().transferMKtoBC(),
                     dealedStock = row[1].getDecimalFromString(),
-                    volume= row[2].getDecimalFromString(),
+                    volume = row[2].getDecimalFromString(),
                     open = row[3].getDecimalFromString(),
                     high = row[4].getDecimalFromString(),
                     low = row[5].getDecimalFromString(),

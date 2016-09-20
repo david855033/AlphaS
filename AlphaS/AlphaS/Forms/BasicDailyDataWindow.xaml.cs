@@ -34,8 +34,6 @@ namespace AlphaS.Forms
             viewModel.acquiredData = "acquired data";
         }
 
-
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Core.settingManager.saveSetting("BasicDailyDataWindowPostitionLeft", this.Left.ToString());
@@ -51,16 +49,8 @@ namespace AlphaS.Forms
         {
             var basicDailyDataDownloader = new BasicDailyDataDownloader(webBrowser);
             basicDailyDataDownloader.setViewModel(viewModel);
-            var missionList = new List<BasicDailyDataMission>()
-            {
-                new BasicDailyDataMission() { ID="1101",year=2016,month=1,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=2,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=3,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=4,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=5,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=6,type="A"},
-                new BasicDailyDataMission() { ID="1101",year=2016,month=7,type="A"}
-            };
+            IBasicDailyDataMissionListGenerator missionListGenerator = new BasicDailyDataMissionListGenerator();
+            var missionList = missionListGenerator.getMissionList();
             basicDailyDataDownloader.setMission(missionList);
             basicDailyDataDownloader.startMission();
         }

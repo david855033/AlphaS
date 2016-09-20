@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using AlphaS.Settings;
 using AlphaS.StockList;
-
+using AlphaS.BasicDailyData;
 namespace AlphaS.CoreNS
 {
     public static class Core
@@ -19,11 +19,13 @@ namespace AlphaS.CoreNS
 
         public static readonly IStockListManager stockListManager = new StockListManager();
 
+        static readonly string BASIC_DAILY_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "BasicDailyData";
+        public static readonly IBasicDailyDataManager basicDailyDataManager = new BasicDailyDataManager(BASIC_DAILY_DATA_FOLDER);
+
         public static bool closeAllWindow=false;
 
         static Core()
         {
-
         }
     }
 }

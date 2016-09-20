@@ -9,6 +9,12 @@ namespace AlphaS.BasicDailyData
 {
     public class BasicDailyDataManager : IBasicDailyDataManager
     {
+        public BasicDailyDataManager() { }
+        public BasicDailyDataManager(string BASIC_DAILY_DATA_FOLDER)
+        {
+            setBaseFolder(BASIC_DAILY_DATA_FOLDER);
+        }
+
         private string _baseFolder;
         public string getBaseFolder()
         {
@@ -25,11 +31,14 @@ namespace AlphaS.BasicDailyData
         {
             var result = new List<BasicDailyDataFileStatusInformation>();
             string filepath = _baseFolder + $@"\{ID}_status.txt";
-            using (var sr = new StreamReader(filepath, Encoding.Default))
+            if (File.Exists(_baseFolder + $@"\{ID}_status.txt"))
             {
-                while (!sr.EndOfStream)
+                using (var sr = new StreamReader(filepath, Encoding.Default))
                 {
-                    result.Add(new BasicDailyDataFileStatusInformation(sr.ReadLine()));
+                    while (!sr.EndOfStream)
+                    {
+                        result.Add(new BasicDailyDataFileStatusInformation(sr.ReadLine()));
+                    }
                 }
             }
             return result;
@@ -38,11 +47,11 @@ namespace AlphaS.BasicDailyData
         public void saveFileStatus(string ID, List<BasicDailyDataFileStatusInformation> fileStatusToWrite)
         {
             string filepath = _baseFolder + $@"\{ID}_status.txt";
-            fileStatusToWrite.Sort();
             using (var sw = new StreamWriter(filepath, false, Encoding.Default))
             {
-                fileStatusToWrite.Sort();
-                foreach (var r in fileStatusToWrite)
+                var toWrite = fileStatusToWrite.ToList();
+                toWrite.Sort();
+                foreach (var r in toWrite)
                 {
                     sw.WriteLine(r.ToString());
                 }
@@ -51,12 +60,33 @@ namespace AlphaS.BasicDailyData
 
         public List<BasicDailyDataInformation> getBasicDailyData(string ID)
         {
-            throw new NotImplementedException();
+            var result = new List<BasicDailyDataInformation>();
+            string filepath = _baseFolder + $@"\{ID}_BasicDailyData.txt";
+            if (File.Exists(_baseFolder + $@"\{ID}_BasicDailyData.txt"))
+            {
+                using (var sr = new StreamReader(filepath, Encoding.Default))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        result.Add(new BasicDailyDataInformation(sr.ReadLine()));
+                    }
+                }
+            }
+            return result;
         }
 
         public void saveBasicDailyData(string ID, List<BasicDailyDataInformation> basicDailyDataToWrite)
         {
-            throw new NotImplementedException();
+            string filepath = _baseFolder + $@"\{ID}_BasicDailyData.txt";
+            using (var sw = new StreamWriter(filepath, false, Encoding.Default))
+            {
+                var toWrite = basicDailyDataToWrite.ToList();
+                toWrite.Sort();
+                foreach (var r in toWrite)
+                {
+                    sw.WriteLine(r.ToString());
+                }
+            }
         }
     }
 }

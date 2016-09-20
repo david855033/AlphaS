@@ -10,37 +10,47 @@ namespace AlphaS.BasicDailyData
     {
         public string year;
         public string month;
+        public int dataCount;
         public FileStatus fileStatus;
         public string modifiedTime;
 
         public int CompareTo(object obj)
         {
             var that = (BasicDailyDataFileStatusInformation)obj;
-            if (this.year.CompareTo(that.year) != 0)
+            if (this.year.getIntFromString().CompareTo(that.year.getIntFromString()) != 0)
             {
-                return this.year.CompareTo(that.year);
+                return this.year.getIntFromString().CompareTo(that.year.getIntFromString());
             }
             else
             {
-                return this.month.CompareTo(that.month);
+                return this.month.getIntFromString().CompareTo(that.month.getIntFromString());
             }
         }
 
+        public BasicDailyDataFileStatusInformation() { }
         public BasicDailyDataFileStatusInformation(string loadString)
         {
             var splitline = loadString.Split('\t');
-            year = splitline[0];
-            month = splitline[1];
-            fileStatus = (FileStatus)Enum.Parse(typeof(FileStatus), splitline[2]);
-            modifiedTime = splitline[3];
+            if (splitline.Length == 5)
+            {
+                year = splitline[0];
+                month = splitline[1];
+                dataCount = splitline[2].getIntFromString();
+                fileStatus = (FileStatus)Enum.Parse(typeof(FileStatus), splitline[3]);
+                modifiedTime = splitline[4];
+            }
         }
         public override string ToString()
         {
-            return this.year + "\t" + this.month + "\t" + this.fileStatus + "\t" + this.modifiedTime;
+            return this.year + "\t" +
+                this.month + "\t" +
+                this.dataCount + "\t" +
+                this.fileStatus + "\t" +
+                this.modifiedTime;
         }
         static public string ToTitle()
         {
-            return "year\tmonth\tstatus\ttime";
+            return "year\tmonth\tdataCount\tstatus\ttime";
         }
     }
     public enum FileStatus { Valid, Null, Temp }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AlphaS.BasicDailyData
 {
-    interface IBasicDailyDataManager
+    public interface IBasicDailyDataManager
     {
         void setBaseFolder(string path);
         string getBaseFolder();
