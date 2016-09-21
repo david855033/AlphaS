@@ -42,17 +42,63 @@ namespace AlphaS.BasicDailyData
 
         public void startMission()
         {
-            webBrowser.DocumentCompleted += loadComplete;
+            webBrowser.DocumentCompleted += loadNextMission;
             viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
             Thread.Sleep(300);
             webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
-
+            currentWebSiteStockType = "A";
         }
 
+        int nullcount = 0;
         BasicDailyDataMission currentMission;
-        void loadComplete(object sender, WebBrowserDocumentCompletedEventArgs e)
+        string currentWebSiteStockType = "";
+        void loadNextMission(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            var doc = webBrowser.Document;
+            recordDataInWebBrowser(webBrowser.Document);
+
+            if (missionList.Count > 0)
+            {
+                currentMission = missionList.First();
+                if (currentMission.type != currentWebSiteStockType)
+                {
+                    //todo: change web site
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                    var query_year = webBrowser.Document.GetElementById("query_year");
+                    var query_month = webBrowser.Document.GetElementById("query_month");
+                    var CO_ID = webBrowser.Document.GetElementById("CO_ID");
+                    var query_button = webBrowser.Document.GetElementById("query-button");
+                    CO_ID.InnerText = currentMission.ID;
+                    foreach (HtmlElement opt in query_year.Children)
+                    {
+                        if (opt.GetAttribute("value") == currentMission.year.ToString())
+                        {
+                            opt.SetAttribute("selected", "selected");
+                            break;
+                        }
+                    }
+                    foreach (HtmlElement opt in query_month.Children)
+                    {
+                        if (opt.GetAttribute("value") == currentMission.month.ToString())
+                        {
+                            opt.SetAttribute("selected", "selected");
+                            break;
+                        }
+                    }
+                    Thread.Sleep(200);
+                    query_button.InvokeMember("click");
+                    Thread.Sleep(500);
+                }
+            }
+            else
+            {
+                webBrowser.DocumentCompleted -= loadNextMission;
+            }
+        }
+        private void recordDataInWebBrowser(HtmlDocument doc)
+        {
             if (currentMission != null)
             {
                 var tables = doc.GetElementsByTagName("table");
@@ -88,14 +134,21 @@ namespace AlphaS.BasicDailyData
                 if (analyzedDataList.Count == 0)
                 {
                     fileStatus = FileStatus.Null;
+                    if (nullcount++ > 2)
+                    {
+                        nullcount = 0;
+                        missionList.Remove(currentMission);
+                    }
                 }
                 else if (DateTime.Now.Year == currentMission.year && DateTime.Now.Month == currentMission.month)
                 {
                     fileStatus = FileStatus.Temp;
+                    missionList.Remove(currentMission);
                 }
                 else
                 {
                     fileStatus = FileStatus.Valid;
+                    missionList.Remove(currentMission);
                 }
                 var currentFileStatus = new BasicDailyDataFileStatusInformation()
                 {
@@ -118,41 +171,18 @@ namespace AlphaS.BasicDailyData
                 Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
                 Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
             }
-            if (missionList.Count > 0)
+        }
+        private void changeWebSite(WebBrowser webBrowser, string type)
+        {
+            if (type == "A")
             {
-                Thread.Sleep(500);
-                currentMission = missionList.First();
-                var query_year = doc.GetElementById("query_year");
-                var query_month = doc.GetElementById("query_month");
-                var CO_ID = doc.GetElementById("CO_ID");
-                var query_button = doc.GetElementById("query-button");
-                CO_ID.InnerText = currentMission.ID;
-                foreach (HtmlElement opt in query_year.Children)
-                {
-                    if (opt.GetAttribute("value") == currentMission.year.ToString())
-                    {
-                        opt.SetAttribute("selected", "selected");
-                        break;
-                    }
-                }
-                foreach (HtmlElement opt in query_month.Children)
-                {
-                    if (opt.GetAttribute("value") == currentMission.month.ToString())
-                    {
-                        opt.SetAttribute("selected", "selected");
-                        break;
-                    }
-                }
-                query_button.InvokeMember("click");
-                Thread.Sleep(500);
-                missionList.Remove(currentMission);
+                webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
             }
-            else
+            else if (type == "B")
             {
-                webBrowser.DocumentCompleted -= loadComplete;
+                webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
             }
         }
-
         List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
             string s = getContentFromtbody(tableInnerHTML);

@@ -36,7 +36,8 @@ namespace AlphaS.BasicDailyData
             {
                 int currentYear = startYear;
                 int currentMonth = startMonth;
-                while (currentYear <= DateTime.Now.Year || currentMonth <= DateTime.Now.Month)
+                while (currentYear < DateTime.Now.Year || 
+                    (currentYear == DateTime.Now.Year && currentMonth <= DateTime.Now.Month))
                 {
                     var toAdd = new BasicDailyDataMission()
                     {
@@ -51,7 +52,7 @@ namespace AlphaS.BasicDailyData
                         var fileStatus = Core.basicDailyDataManager.getFileStatus(currentStock.ID);
                         int index = fileStatus.BinarySearch(new BasicDailyDataFileStatusInformation()
                         { year = currentYear.ToString(), month = currentMonth.ToString() });
-                        if ((index >=0 && fileStatus[index].fileStatus == FileStatus.Temp) || index <0)
+                        if ((index >= 0 && fileStatus[index].fileStatus == FileStatus.Temp) || index < 0)
                         {
                             resultList.Add(toAdd);
                         }
@@ -61,16 +62,16 @@ namespace AlphaS.BasicDailyData
                         resultList.Add(toAdd);
                     }
 
-                currentMonth++;
-                if (currentMonth > 12)
-                {
-                    currentMonth = 1;
-                    currentYear++;
+                    currentMonth++;
+                    if (currentMonth > 12)
+                    {
+                        currentMonth = 1;
+                        currentYear++;
+                    }
                 }
             }
-        }
             return resultList;
         }
 
-}
+    }
 }

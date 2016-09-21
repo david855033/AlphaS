@@ -46,5 +46,15 @@ namespace AlphaS.BasicDailyData
                 OnPropertyChanged(nameof(startMonth));
             }
         }
+        private bool _IsReadAll;
+        public bool IsReadAll
+        {
+            get { return _IsReadAll; }
+            set
+            {
+                _IsReadAll = value;
+                OnPropertyChanged(nameof(IsReadAll));
+            }
+        }
     }
 }

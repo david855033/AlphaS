@@ -34,6 +34,7 @@ namespace AlphaS.Forms
             viewModel.acquiredData = "acquired data";
             viewModel.startYear = Core.settingManager.getSetting("BasicDailyDataWindowStartYear");
             viewModel.startMonth = Core.settingManager.getSetting("BasicDailyDataWindowStartMonth");
+            viewModel.IsReadAll = false;
         }
 
         public static System.Windows.Forms.WebBrowser webBrowser = new System.Windows.Forms.WebBrowser();
@@ -74,7 +75,7 @@ namespace AlphaS.Forms
             missionListGenerator.setStartMonth(viewModel.startMonth.getIntFromString());
             missionListGenerator.setStockList(Core.stockListManager.getStockList());
 
-            var missionList = missionListGenerator.getMissionList(false);
+            var missionList = missionListGenerator.getMissionList(viewModel.IsReadAll);
 
             basicDailyDataDownloader.setMission(missionList);
             basicDailyDataDownloader.startMission();
