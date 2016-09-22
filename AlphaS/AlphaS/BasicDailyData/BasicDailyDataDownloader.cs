@@ -47,216 +47,302 @@ namespace AlphaS.BasicDailyData
             Thread.Sleep(300);
             webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
             currentWebSiteStockType = "A";
+            currentMission = null;
         }
 
         int nullcount = 0;
         BasicDailyDataMission currentMission;
         string currentWebSiteStockType = "";
+
         void loadNextMission(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            recordDataInWebBrowser(webBrowser.Document);
-
+            if (missionList.Count == 0)
+            {
+                webBrowser.DocumentCompleted -= loadNextMission;
+            }
+            else if (currentMission == missionList.First())
+            {
+                recordDataInWebBrowser(webBrowser.Document);
+            }
+            
             if (missionList.Count > 0)
             {
                 currentMission = missionList.First();
                 if (currentMission.type != currentWebSiteStockType)
                 {
-                    //todo: change web site
+                    changeWebSite(webBrowser, currentMission.type);
                 }
                 else
                 {
                     Thread.Sleep(500);
-                    var query_year = webBrowser.Document.GetElementById("query_year");
-                    var query_month = webBrowser.Document.GetElementById("query_month");
-                    var CO_ID = webBrowser.Document.GetElementById("CO_ID");
-                    var query_button = webBrowser.Document.GetElementById("query-button");
-                    CO_ID.InnerText = currentMission.ID;
-                    foreach (HtmlElement opt in query_year.Children)
-                    {
-                        if (opt.GetAttribute("value") == currentMission.year.ToString())
-                        {
-                            opt.SetAttribute("selected", "selected");
-                            break;
-                        }
-                    }
-                    foreach (HtmlElement opt in query_month.Children)
-                    {
-                        if (opt.GetAttribute("value") == currentMission.month.ToString())
-                        {
-                            opt.SetAttribute("selected", "selected");
-                            break;
-                        }
-                    }
-                    Thread.Sleep(200);
-                    query_button.InvokeMember("click");
+                    selectIDandDateThenDoQuery(currentWebSiteStockType);
                     Thread.Sleep(500);
                 }
+            }
+        }
+    
+    private void recordDataInWebBrowser(HtmlDocument doc)
+    {
+
+        viewModel.acquiredData = currentMission.ToString() + "\r\n";
+        viewModel.acquiredData += BasicDailyDataInformation.ToTitle() + "\r\n";
+        var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
+        var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
+
+        HtmlElement resultTable = getResultTable(doc);
+        List<BasicDailyDataInformation> analyzedDataList = analysisDataTable(resultTable.InnerHtml);
+
+        foreach (var currentBasicDailyData in analyzedDataList)
+        {
+            int index = basicDailyDataList.BinarySearch(currentBasicDailyData);
+            if (index >= 0)
+            {
+                basicDailyDataList[index] = currentBasicDailyData;
             }
             else
             {
-                webBrowser.DocumentCompleted -= loadNextMission;
+                basicDailyDataList.Insert(~index, currentBasicDailyData);
             }
+            viewModel.acquiredData += currentBasicDailyData.ToString() + "\r\n";
         }
-        private void recordDataInWebBrowser(HtmlDocument doc)
-        {
-            if (currentMission != null)
-            {
-                var tables = doc.GetElementsByTagName("table");
-                HtmlElement dataTable = tables[0];
-                foreach (HtmlElement table in tables)
-                {
-                    if (table.InnerHtml.Contains("各日成交資訊"))
-                    {
-                        dataTable = table;
-                        break;
-                    }
-                }
-                viewModel.acquiredData = currentMission.ToString() + "\r\n";
-                viewModel.acquiredData += BasicDailyDataInformation.ToTitle() + "\r\n";
-                var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
-                var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
-                var analyzedDataList = analysisDataTable(dataTable.InnerHtml);
-                foreach (var currentBasicDailyData in analyzedDataList)
-                {
-                    int index = basicDailyDataList.BinarySearch(currentBasicDailyData);
-                    if (index >= 0)
-                    {
-                        basicDailyDataList[index] = currentBasicDailyData;
-                    }
-                    else
-                    {
-                        basicDailyDataList.Insert(~index, currentBasicDailyData);
-                    }
-                    viewModel.acquiredData += currentBasicDailyData.ToString() + "\r\n";
-                }
 
-                var fileStatus = new FileStatus();
-                if (analyzedDataList.Count == 0)
-                {
-                    fileStatus = FileStatus.Null;
-                    if (nullcount++ > 2)
-                    {
-                        nullcount = 0;
-                        missionList.Remove(currentMission);
-                    }
-                }
-                else if (DateTime.Now.Year == currentMission.year && DateTime.Now.Month == currentMission.month)
-                {
-                    fileStatus = FileStatus.Temp;
-                    missionList.Remove(currentMission);
-                }
-                else
-                {
-                    fileStatus = FileStatus.Valid;
-                    missionList.Remove(currentMission);
-                }
-                var currentFileStatus = new BasicDailyDataFileStatusInformation()
-                {
-                    month = currentMission.month.ToString(),
-                    year = currentMission.year.ToString(),
-                    dataCount = analyzedDataList.Count(),
-                    modifiedTime = DateTime.Now.ToString(),
-                    fileStatus = fileStatus
-                };
-                var indexFileStatus = fileStatusList.BinarySearch(currentFileStatus);
-                if (indexFileStatus >= 0)
-                {
-                    fileStatusList[indexFileStatus] = currentFileStatus;
-                }
-                else
-                {
-                    fileStatusList.Insert(~indexFileStatus, currentFileStatus);
-                }
+        var fileStatus = new FileStatus();
+        if (analyzedDataList.Count == 0)
+        {
+            fileStatus = FileStatus.Null;
+            if (nullcount++ > 2)
+            {
+                nullcount = 0;
+                missionList.Remove(currentMission);
+            }
+        }
+        else if (DateTime.Now.Year == currentMission.year && DateTime.Now.Month == currentMission.month)
+        {
+            fileStatus = FileStatus.Temp;
+            missionList.Remove(currentMission);
+        }
+        else
+        {
+            fileStatus = FileStatus.Valid;
+            missionList.Remove(currentMission);
+        }
 
-                Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
-                Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
+        var currentFileStatus = new BasicDailyDataFileStatusInformation()
+        {
+            month = currentMission.month.ToString(),
+            year = currentMission.year.ToString(),
+            dataCount = analyzedDataList.Count(),
+            modifiedTime = DateTime.Now.ToString(),
+            fileStatus = fileStatus
+        };
+        var indexFileStatus = fileStatusList.BinarySearch(currentFileStatus);
+        if (indexFileStatus >= 0)
+        {
+            fileStatusList[indexFileStatus] = currentFileStatus;
+        }
+        else
+        {
+            fileStatusList.Insert(~indexFileStatus, currentFileStatus);
+        }
+
+        Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
+        Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
+    }
+
+    private HtmlElement getResultTable(HtmlDocument doc)
+    {
+        if (currentWebSiteStockType == "A")
+        {
+            HtmlElementCollection tables = doc.GetElementsByTagName("table");
+            foreach (HtmlElement table in tables)
+            {
+                if (table.InnerHtml.Contains("各日成交資訊"))
+                {
+                    return table;
+                }
             }
         }
-        private void changeWebSite(WebBrowser webBrowser, string type)
+        else if (currentWebSiteStockType == "B")
         {
-            if (type == "A")
-            {
-                webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
-            }
-            else if (type == "B")
-            {
-                webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
-            }
+            return doc.GetElementById("st43_result");
         }
-        List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
+        throw new InvalidOperationException();
+    }
+
+    List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
+    {
+        string s = getContentFromtbody(tableInnerHTML);
+        if (currentWebSiteStockType == "A")
         {
-            string s = getContentFromtbody(tableInnerHTML);
             List<string> dataByRows = getListByTableRow(s);
             List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
-            List<BasicDailyDataInformation> result = fillInBasicDailyDataInformation(dataByRowsAndCols);
-
-            return result;
+            return fillInBasicDailyDataInformation(dataByRowsAndCols);
         }
-
-        private List<BasicDailyDataInformation> fillInBasicDailyDataInformation(List<string[]> dataByRowsAndCols)
+        else if (currentWebSiteStockType == "B")
         {
-            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
-            foreach (var row in dataByRowsAndCols)
-            {
-                if (row.Length != 9)
-                {
-                    continue;
-                }
-                var toAdd = new BasicDailyDataInformation()
-                {
-                    date = row[0].getDateTimeFromStringMK(),
-                    dealedStock = row[1].getDecimalFromString(),
-                    volume = row[2].getDecimalFromString(),
-                    open = row[3].getDecimalFromString(),
-                    high = row[4].getDecimalFromString(),
-                    low = row[5].getDecimalFromString(),
-                    close = row[6].getDecimalFromString(),
-                    change = row[7].getDecimalFromString(),
-                    dealedOrder = row[8].getDecimalFromString()
-                };
-                result.Add(toAdd);
-            }
-            return result;
+            List<string> dataByRows = getListByTableRow(s);
+            List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
+            return fillInBasicDailyDataInformation(dataByRowsAndCols);
         }
-
-        string getContentFromtbody(string input)
+        throw new InvalidOperationException();
+    }
+    public string getContentFromtbody(string input)
+    {
+        var m = Regex.Match(input, @"<tbody[^>]*>.*<\/tbody>");
+        if (m.Success)
         {
-            var m = Regex.Match(input, @"<tbody>.*<\/tbody>");
-            if (m.Success)
-            {
-                var result = m.Value.Replace("<tbody>", "").Replace(@"<\/tbody>", "");
-                return result;
-            }
-            else
-            { return ""; }
+            return Regex.Replace(m.Value, @"<tbody[^>]*>|<\/tbody>", "");
         }
-        List<string> getListByTableRow(string input)
+        else
         {
-            var m = Regex.Match(input, @"<tr>.*?<\/tr>");
-            var resultList = new List<string>();
-            while (m.Success)
-            {
-                resultList.Add(m.Value.Replace("<tr>", "").Replace(@"<\/tr>", ""));
-                m = m.NextMatch();
-            }
-            return resultList;
-        }
-        List<string[]> splitRowContentIntoCols(List<string> input)
-        {
-            List<string[]> result = new List<string[]>();
-
-            foreach (var s in input)
-            {
-                var m = Regex.Match(s, @"<td[^>]*>.*?<\/td>");
-                var thisRow = new List<string>();
-                while (m.Success)
-                {
-                    thisRow.Add(Regex.Replace(m.Value, @"<td[^>]*>|<\/td>", ""));
-                    m = m.NextMatch();
-                }
-                result.Add(thisRow.ToArray());
-            }
-            return result;
+            return "";
         }
     }
+    List<string> getListByTableRow(string input)
+    {
+        var m = Regex.Match(input, @"<tr[^>]*>.*?<\/tr>");
+        var resultList = new List<string>();
+        while (m.Success)
+        {
+            resultList.Add(Regex.Replace(m.Value, @"<tr[^>]*>|<\/tr>", ""));
+            m = m.NextMatch();
+        }
+        return resultList;
+    }
+    private List<BasicDailyDataInformation> fillInBasicDailyDataInformation(List<string[]> dataByRowsAndCols)
+    {
+        List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
+        foreach (var row in dataByRowsAndCols)
+        {
+            if (row.Length != 9)
+            {
+                continue;
+            }
+            var toAdd = new BasicDailyDataInformation()
+            {
+                date = row[0].getDateTimeFromStringMK(),
+                dealedStock = row[1].getDecimalFromString(),
+                volume = row[2].getDecimalFromString(),
+                open = row[3].getDecimalFromString(),
+                high = row[4].getDecimalFromString(),
+                low = row[5].getDecimalFromString(),
+                close = row[6].getDecimalFromString(),
+                change = row[7].getDecimalFromString(),
+                dealedOrder = row[8].getDecimalFromString()
+            };
+            result.Add(toAdd);
+        }
+        return result;
+    }
+    List<string[]> splitRowContentIntoCols(List<string> input)
+    {
+        List<string[]> result = new List<string[]>();
+
+        foreach (var s in input)
+        {
+            var m = Regex.Match(s, @"<td[^>]*>.*?<\/td>");
+            var thisRow = new List<string>();
+            while (m.Success)
+            {
+                thisRow.Add(Regex.Replace(m.Value, @"<td[^>]*>|<\/td>", ""));
+                m = m.NextMatch();
+            }
+            result.Add(thisRow.ToArray());
+        }
+        return result;
+    }
+
+    private void changeWebSite(WebBrowser webBrowser, string type)
+    {
+        if (type == "A")
+        {
+            webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+        }
+        else if (type == "B")
+        {
+            webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
+        }
+        currentWebSiteStockType = type;
+        currentMission = null;
+    }
+
+    private void selectIDandDateThenDoQuery(string currentWebSiteStockType)
+    {
+        if (currentWebSiteStockType == "A")
+        { selectIDandDateThenDoQueryA(); }
+        else
+        { selectIDandDateThenDoQueryB(); }
+    }
+    private void selectIDandDateThenDoQueryA()
+    {
+        var query_year = webBrowser.Document.GetElementById("query_year");
+        var query_month = webBrowser.Document.GetElementById("query_month");
+        var CO_ID = webBrowser.Document.GetElementById("CO_ID");
+        var query_button = webBrowser.Document.GetElementById("query-button");
+        CO_ID.InnerText = currentMission.ID;
+        foreach (HtmlElement opt in query_year.Children)
+        {
+            if (opt.GetAttribute("value") == currentMission.year.ToString())
+            {
+                opt.SetAttribute("selected", "selected");
+                break;
+            }
+        }
+        foreach (HtmlElement opt in query_month.Children)
+        {
+            if (opt.GetAttribute("value") == currentMission.month.ToString())
+            {
+                opt.SetAttribute("selected", "selected");
+                break;
+            }
+        }
+        Thread.Sleep(200);
+        query_button.InvokeMember("click");
+    }
+    private void selectIDandDateThenDoQueryB()
+    {
+        changeEnglishTyping();
+        var input_date = webBrowser.Document.GetElementById("input_date");
+        var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
+        input_date.Focus();
+        Thread.Sleep(300);
+        sendDels();
+        Thread.Sleep(300);
+        System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
+        Thread.Sleep(300);
+        input_stock_code.Focus();
+        Thread.Sleep(300);
+        sendDels();
+        Thread.Sleep(300);
+        System.Windows.Forms.SendKeys.SendWait($"{currentMission.ID}");
+        Thread.Sleep(300);
+        System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+        Thread.Sleep(1000);
+        input_stock_code.RemoveFocus();
+        //****
+        loadNextMission(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));
+    }
+
+    private void changeEnglishTyping()
+    {
+        foreach (InputLanguage language in InputLanguage.InstalledInputLanguages)
+        {
+            if (language.LayoutName.Contains("US"))
+            {
+                InputLanguage.CurrentInputLanguage = language;
+                return;
+            }
+        }
+    }
+    private static void sendDels()
+    {
+        int c = 0;
+        while (c++ < 20)
+        {
+            System.Windows.Forms.SendKeys.SendWait("{END}");
+            System.Windows.Forms.SendKeys.SendWait("{BACKSPACE}");
+        }
+    }
+
+}
 }
