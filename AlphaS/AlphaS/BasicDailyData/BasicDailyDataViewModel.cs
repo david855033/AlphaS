@@ -18,6 +18,16 @@ namespace AlphaS.BasicDailyData
                 OnPropertyChanged(nameof(acquiredData));
             }
         }
+        private string _missionList;
+        public string missionList
+        {
+            get { return _missionList; }
+            set
+            {
+                _missionList = value;
+                OnPropertyChanged(nameof(missionList));
+            }
+        }
         private int _startYear;
         public string startYear
         {

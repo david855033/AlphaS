@@ -14,7 +14,7 @@ namespace AlphaS.BasicDailyData
         public int month;
         public override string ToString()
         {
-            return $"Mission: ID:{ID}, type:{type}, year:{year}, month:{month}";
+            return $"Mission - [{ID}]\t'{type}'\t({year}/{month})";
         }
     }
 }
