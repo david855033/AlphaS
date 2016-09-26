@@ -70,7 +70,12 @@
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataMissionListGenerator.cs" />
+    <Compile Include="DataAnalyzer\AnalyzedDataInformation.cs" />
+    <Compile Include="DataAnalyzer\AnalyzedDataManager.cs" />
+    <Compile Include="DataAnalyzer\DataAnalyzer.cs" />
+    <Compile Include="DataAnalyzer\IAnalyzedDataManager.cs" />
     <Compile Include="DataAnalyzer\DataAnalyzerViewModel.cs" />
+    <Compile Include="DataAnalyzer\IDataAnalyzer.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
     </Compile>

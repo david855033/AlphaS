@@ -14,7 +14,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <TextBlock FontSize="15" Margin="0,20">Function</TextBlock>
-            <Button Click="Button_Click">UpdateDiv</Button>
+            <Button Click="UpdateDiv">UpdateDiv</Button>
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding display}"/>
     </Grid>

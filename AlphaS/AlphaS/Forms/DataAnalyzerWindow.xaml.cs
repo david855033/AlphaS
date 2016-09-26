@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AlphaS.CoreNS;
-using AlphaS.DataAnalyzer.Divide;
+using AlphaS.DataAnalyzer;
 namespace AlphaS.Forms
 {
     /// <summary>
@@ -21,12 +21,15 @@ namespace AlphaS.Forms
     public partial class DataAnalyzerWindow : Window
     {
         MainWindow mainWindow;
+        DataAnalyzerViewModel viewModel = new DataAnalyzerViewModel();
         public DataAnalyzerWindow(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
             InitializeComponent();
             this.Left = Core.settingManager.getSetting("DataAnalyzerWindowPostitionLeft").getIntFromString();
             this.Top = Core.settingManager.getSetting("DataAnalyzerWindowPostitionTop").getIntFromString();
+            this.DataContext = viewModel;
+            viewModel.display = "console";
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -42,12 +45,13 @@ namespace AlphaS.Forms
 
         private void UpdateDiv(object sender, RoutedEventArgs e)
         {
-            IDivideCalculator divideCalculator = new DivideCalculator(); ;
+            IDataAnalyzer divideCalculator = new DataAnalyzer.DataAnalyzer(); ;
             divideCalculator.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData("1101"));
             divideCalculator.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData("1101"));
             divideCalculator.calculateDivideData();
+            viewModel.display = divideCalculator.getDisplay();
             Core.basicDailyDataManager.saveBasicDailyData("1101",divideCalculator.getBasicDailyData());
-
+            Core.analyzedDataManager.saveAnalyzedData("1101", divideCalculator.getAnalyzedData());
         }
     }
 }

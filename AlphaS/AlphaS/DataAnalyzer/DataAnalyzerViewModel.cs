@@ -8,14 +8,14 @@ namespace AlphaS.DataAnalyzer
 {
     public class DataAnalyzerViewModel : ViewModelProtoType
     {
-        private string _console;
-        public string console
+        private string _display;
+        public string display
         {
-            get { return _console; }
+            get { return _display; }
             set
             {
-                _console = value;
-                OnPropertyChanged(nameof(console));
+                _display = value;
+                OnPropertyChanged(nameof(display));
             }
         }
     }

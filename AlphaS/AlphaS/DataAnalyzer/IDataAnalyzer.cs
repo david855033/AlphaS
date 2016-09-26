@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AlphaS.BasicDailyData;
-namespace AlphaS.DataAnalyzer.Divide
+namespace AlphaS.DataAnalyzer
 {
-    public interface IDivideCalculator
+    public interface IDataAnalyzer
     {
         void setAnalyzedData(List<AnalyzedDataInformation> AnalyzedData);
         List<AnalyzedDataInformation>  getAnalyzedData();
@@ -14,7 +14,7 @@ namespace AlphaS.DataAnalyzer.Divide
         void setBasicDailyData(List<BasicDailyDataInformation> setBasicDailyData);
         List<BasicDailyDataInformation> getBasicDailyData();
 
-        void setViewModel(DataAnalyzerViewModel viewModel);
+        string getDisplay();
 
         void calculateDivideData();
     }
