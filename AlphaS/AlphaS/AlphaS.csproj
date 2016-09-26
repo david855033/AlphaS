@@ -70,8 +70,12 @@
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataMissionListGenerator.cs" />
+    <Compile Include="DataAnalyzer\DataAnalyzerViewModel.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DataAnalyzerWindow.xaml.cs">
+      <DependentUpon>DataAnalyzerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\StockListWindow.xaml.cs">
       <DependentUpon>StockListWindow.xaml</DependentUpon>
@@ -84,6 +88,10 @@
     <Compile Include="StockList\StockListManager.cs" />
     <Compile Include="ViewModelProtoType.cs" />
     <Page Include="Forms\BasicDailyDataWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\DataAnalyzerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -133,7 +141,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DataAnalyzer\Divide\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

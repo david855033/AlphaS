@@ -34,6 +34,7 @@ namespace AlphaS
         {
            windowList.Add("StockListWindow", new StockListWindow(this));
            windowList.Add("BasicDailyDataWindow", new BasicDailyDataWindow(this));
+            windowList.Add("DataAnalyzerWindow", new DataAnalyzerWindow(this));
 
             foreach (var pair in windowList)
             {
@@ -76,6 +77,11 @@ namespace AlphaS
         private void toggleBasicDailyData(object sender, RoutedEventArgs e)
         {
             toggleWindow("BasicDailyDataWindow");
+        }
+
+        private void toggleDataAnalyzer(object sender, RoutedEventArgs e)
+        {
+            toggleWindow("DataAnalyzerWindow");
         }
     }
 }

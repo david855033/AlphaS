@@ -7,6 +7,7 @@ using System.IO;
 using AlphaS.Settings;
 using AlphaS.StockList;
 using AlphaS.BasicDailyData;
+using AlphaS.DataAnalyzer;
 namespace AlphaS.CoreNS
 {
     public static class Core
@@ -22,7 +23,10 @@ namespace AlphaS.CoreNS
         static readonly string BASIC_DAILY_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "BasicDailyData";
         public static readonly IBasicDailyDataManager basicDailyDataManager = new BasicDailyDataManager(BASIC_DAILY_DATA_FOLDER);
 
-        public static bool closeAllWindow=false;
+        static readonly string ANALYZED_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "AnalyzedData";
+        public static readonly IAnalyzedDataManager analyzedDataManager = new AnalyzedDataManager(ANALYZED_DATA_FOLDER);
+
+        public static bool closeAllWindow = false;
 
         static Core()
         {

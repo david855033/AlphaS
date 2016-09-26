@@ -32,6 +32,7 @@ namespace AlphaS.Forms
             this.Top = Core.settingManager.getSetting("BasicDailyDataWindowPostitionTop").getIntFromString();
             this.DataContext = viewModel;
             viewModel.acquiredData = "acquired data";
+            viewModel.missionList = "missionList";
             viewModel.startYear = Core.settingManager.getSetting("BasicDailyDataWindowStartYear");
             viewModel.startMonth = Core.settingManager.getSetting("BasicDailyDataWindowStartMonth");
             viewModel.IsReadAll = false;
