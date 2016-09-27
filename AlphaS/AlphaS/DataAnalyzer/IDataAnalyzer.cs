@@ -15,7 +15,7 @@ namespace AlphaS.DataAnalyzer
         List<BasicDailyDataInformation> getBasicDailyData();
 
         string getDisplay();
-
+       
         void calculateDivideData();
     }
 }

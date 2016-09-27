@@ -44,6 +44,24 @@ namespace AlphaS
             return result;
         }
 
+        public static Double getDoubleFromString(this string input)
+        {
+            bool success = false;
+            return input.getDoubleFromString(out success);
+        }
+        public static Double getDoubleFromString(this string input, out bool success)
+        {
+            Double result;
+            input = Regex.Replace(input, @"[^0-9.-]", "");
+            if (input == "")
+            {
+                success = true;
+                return 0;
+            }
+            success = Double.TryParse(input, out result);
+            return result;
+        }
+
         public static DateTime getDateTimeFromString(this string input)
         {
             bool success = false;

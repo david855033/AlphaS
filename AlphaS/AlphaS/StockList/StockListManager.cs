@@ -11,7 +11,7 @@ namespace AlphaS.StockList
 {
     public class StockListManager : IStockListManager
     {
-        List<StockInfomation> stockList = new List<StockInfomation>();
+        List<StockInfomation> stockList= new List<StockInfomation>();
 
         public IEnumerable<StockInfomation> getStockList()
         {
@@ -22,6 +22,7 @@ namespace AlphaS.StockList
         {
             DataSet stockData = new DataSet();
             stockData.LoadData(StockListFilePath);
+            stockList = new List<StockInfomation>();
             foreach (var row in stockData.DataRow)
             {
                 stockList.Add(new StockInfomation(row, stockData.index));

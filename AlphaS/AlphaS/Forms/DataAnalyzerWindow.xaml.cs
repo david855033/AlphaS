@@ -45,7 +45,8 @@ namespace AlphaS.Forms
 
         private void UpdateDiv(object sender, RoutedEventArgs e)
         {
-            IDataAnalyzer divideCalculator = new DataAnalyzer.DataAnalyzer(); ;
+            IDataAnalyzer divideCalculator = new DataAnalyzer.DataAnalyzer();
+            
             divideCalculator.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData("1101"));
             divideCalculator.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData("1101"));
             divideCalculator.calculateDivideData();
