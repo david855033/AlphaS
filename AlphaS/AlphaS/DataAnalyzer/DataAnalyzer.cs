@@ -36,7 +36,7 @@ namespace AlphaS.DataAnalyzer
             {
                 lastDateInAnalyzedData = analyzedData.Last().date;
             }
-
+            addDisplay($"Last Date In Analyzed Data = {lastDateInAnalyzedData.ToShortDateString()}");
             int startIndexInBasicDailyData = basicDailyData.FindIndex(x => x.date > lastDateInAnalyzedData);
             double startWeight = getStartWeight();
             for (int i = startIndexInBasicDailyData; i < basicDailyData.Count(); i++)
@@ -59,8 +59,8 @@ namespace AlphaS.DataAnalyzer
             return startWeight;
         }
 
-
         private string display = "";
+        private void addDisplay(string s) { display += s + "\r\n"; }
         public string getDisplay()
         {
             return display;
