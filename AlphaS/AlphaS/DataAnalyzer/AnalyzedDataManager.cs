@@ -46,7 +46,7 @@ namespace AlphaS.DataAnalyzer
 
         public void saveAnalyzedData(string ID, List<AnalyzedDataInformation> AnalyzedDataToWrite)
         {
-            string filepath = _baseFolder + $@"\{ID}_status.txt";
+            string filepath = _baseFolder + $@"\{ID}_AnalyzedData.txt";
             using (var sw = new StreamWriter(filepath, false, Encoding.Default))
             {
                 var toWrite = AnalyzedDataToWrite.ToList();

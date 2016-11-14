@@ -25,7 +25,11 @@ namespace AlphaS.StockList
             stockList = new List<StockInfomation>();
             foreach (var row in stockData.DataRow)
             {
-                stockList.Add(new StockInfomation(row, stockData.index));
+                try
+                {
+                    stockList.Add(new StockInfomation(row, stockData.index));
+                }
+                catch { }
             }
         }
 

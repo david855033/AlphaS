@@ -18,6 +18,7 @@ namespace AlphaS.BasicDailyData
         public decimal change;
         public decimal dealedOrder;
 
+
         public BasicDailyDataInformation() { }
         public BasicDailyDataInformation(string loadString)
         {
@@ -44,7 +45,7 @@ namespace AlphaS.BasicDailyData
             sb.Append(low.ToString() + "\t");
             sb.Append(close.ToString() + "\t");
             sb.Append(change.ToString() + "\t");
-            sb.Append(dealedOrder.ToString());
+            sb.Append(dealedOrder.ToString()+"\t");
             return sb.ToString();
         }
 

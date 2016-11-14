@@ -54,6 +54,7 @@
     <Compile Include="BasicDailyData\BasicDailyDataDownloaderTests.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataFileStatusInformationTests.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataManagerTests.cs" />
+    <Compile Include="DataAnalyzer\DataAnalyzerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticClassTests.cs" />
   </ItemGroup>

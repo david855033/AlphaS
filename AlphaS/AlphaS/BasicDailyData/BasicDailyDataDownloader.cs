@@ -354,7 +354,7 @@ namespace AlphaS.BasicDailyData
         }
         private void selectIDandDateThenDoQueryB()
         {
-            const int WAIT_RESP_TIME = 100;
+            const int WAIT_RESP_TIME = 20;
             changeEnglishTyping();
             var input_date = webBrowser.Document.GetElementById("input_date");
             var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
@@ -368,7 +368,7 @@ namespace AlphaS.BasicDailyData
             System.Windows.Forms.SendKeys.SendWait("{ESC}");
             Thread.Sleep(WAIT_RESP_TIME);
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME);
+            Thread.Sleep(WAIT_RESP_TIME * 2);
             input_stock_code.RemoveFocus();
 
             input_date.Focus();
@@ -380,7 +380,7 @@ namespace AlphaS.BasicDailyData
             System.Windows.Forms.SendKeys.SendWait("{ESC}");
             Thread.Sleep(WAIT_RESP_TIME);
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME);
+            Thread.Sleep(WAIT_RESP_TIME * 2);
             input_date.RemoveFocus();
             //****
             analyzeHTML(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));

@@ -1,4 +1,5 @@
 ﻿using AlphaS.BasicDailyData;
+using AlphaS.DataAnalyzer.ParameterCalculators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,32 +10,56 @@ namespace AlphaS.DataAnalyzer
 {
     public class AnalyzedDataInformation : BasicDailyDataInformation
     {
-
+        public decimal avg;
+        public decimal N_avg;
         public decimal N_open;
         public decimal N_high;
         public decimal N_low;
         public decimal N_close;
         public decimal divide;
+        public decimal volumePerOrder;
         public double divideWeight;
+        public bool recentEmpty; //120day
+
+        static public Dictionary<string, int> parameterIndex = new Dictionary<string, int>();
+        static AnalyzedDataInformation() { paramterIndexInitializer.initialize(); }
+
+        public Nullable<decimal>[] parameters =
+            new Nullable<decimal>[parameterIndex.Count()];
 
         public AnalyzedDataInformation(string loadString)
         {
             var splitline = loadString.Split('\t');
-            date = splitline[0].getDateTimeFromString();
-            dealedStock = splitline[1].getDecimalFromString();
-            volume = splitline[2].getDecimalFromString();
-            open = splitline[3].getDecimalFromString();
-            high = splitline[4].getDecimalFromString();
-            low = splitline[5].getDecimalFromString();
-            close = splitline[6].getDecimalFromString();
-            change = splitline[7].getDecimalFromString();
-            dealedOrder = splitline[8].getDecimalFromString();
-            divide = splitline[9].getDecimalFromString();
-            divideWeight = splitline[10].getDoubleFromString();
-            N_open = splitline[11].getDecimalFromString();
-            N_high = splitline[12].getDecimalFromString();
-            N_low = splitline[13].getDecimalFromString();
-            N_close = splitline[14].getDecimalFromString();
+            int i = 0;
+            date = splitline[i++].getDateTimeFromString();
+            dealedStock = splitline[i++].getDecimalFromString();
+            volume = splitline[i++].getDecimalFromString();
+            open = splitline[i++].getDecimalFromString();
+            high = splitline[i++].getDecimalFromString();
+            low = splitline[i++].getDecimalFromString();
+            close = splitline[i++].getDecimalFromString();
+            change = splitline[i++].getDecimalFromString();
+            dealedOrder = splitline[i++].getDecimalFromString();
+            avg = splitline[i++].getDecimalFromString();
+            volumePerOrder = splitline[i++].getDecimalFromString();
+            recentEmpty = splitline[i++].getBoolFromString();
+            divide = splitline[i++].getDecimalFromString();
+            divideWeight = splitline[i++].getDoubleFromString();
+            N_open = splitline[i++].getDecimalFromString();
+            N_high = splitline[i++].getDecimalFromString();
+            N_low = splitline[i++].getDecimalFromString();
+            N_close = splitline[i++].getDecimalFromString();
+            N_avg = splitline[i++].getDecimalFromString();
+            if (splitline.Length > i)
+            {
+                for (int x = i ; x < splitline.Length; x++)
+                {
+                    if (splitline[x] != "NA")
+                    {
+                        parameters[x - i] = splitline[x].getDecimalFromString();
+                    }
+                }
+            }
         }
 
         public AnalyzedDataInformation(BasicDailyDataInformation basicDailyDataInformation)
@@ -48,26 +73,53 @@ namespace AlphaS.DataAnalyzer
             close = basicDailyDataInformation.close;
             change = basicDailyDataInformation.change;
             dealedOrder = basicDailyDataInformation.dealedOrder;
+            divideWeight = 0;
+
+        }
+
+        public void setNprice()
+        {
+            if (dealedStock > 0) { avg = volume / dealedStock; } else { avg = close; }
+            N_open = open * divideWeight.getDecimalFromDouble();
+            N_high = high * divideWeight.getDecimalFromDouble();
+            N_low = low * divideWeight.getDecimalFromDouble();
+            N_close = close * divideWeight.getDecimalFromDouble();
+            N_avg = avg * divideWeight.getDecimalFromDouble();
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(date.ToString("yyyy-MM-dd") + "\t");
-            sb.Append(dealedStock.ToString() + "\t");
-            sb.Append(volume.ToString() + "\t");
-            sb.Append(open.ToString() + "\t");
-            sb.Append(high.ToString() + "\t");
-            sb.Append(low.ToString() + "\t");
-            sb.Append(close.ToString() + "\t");
-            sb.Append(change.ToString() + "\t");
-            sb.Append(dealedOrder.ToString() + "\t");
-            sb.Append(divide.ToString() + "\t");
-            sb.Append(divideWeight.ToString() + "\t");
-            sb.Append(N_open.ToString() + "\t");
-            sb.Append(N_high.ToString() + "\t");
-            sb.Append(N_low.ToString() + "\t");
-            sb.Append(N_close.ToString());
+            sb.Append(date.ToString("yyyy-MM-dd"));
+            sb.Append("\t" + dealedStock.ToString());
+            sb.Append("\t" + volume.ToString());
+            sb.Append("\t" + open.ToString());
+            sb.Append("\t" + high.ToString());
+            sb.Append("\t" + low.ToString());
+            sb.Append("\t" + close.ToString());
+            sb.Append("\t" + change.ToString());
+            sb.Append("\t" + dealedOrder.ToString());
+            sb.Append("\t" + avg.ToString());
+            sb.Append("\t" + volumePerOrder.ToString());
+            sb.Append("\t" + (recentEmpty ? "1" : "0"));
+            sb.Append("\t" + divide.ToString());
+            sb.Append("\t" + divideWeight.ToString());
+            sb.Append("\t" + N_open.ToString());
+            sb.Append("\t" + N_high.ToString());
+            sb.Append("\t" + N_low.ToString());
+            sb.Append("\t" + N_close.ToString());
+            sb.Append("\t" + N_avg.ToString());
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].HasValue)
+                {
+                    sb.Append("\t" + parameters[i].ToString());
+                }
+                else
+                {
+                    sb.Append("\tNA");
+                }
+            }
             return sb.ToString();
         }
 

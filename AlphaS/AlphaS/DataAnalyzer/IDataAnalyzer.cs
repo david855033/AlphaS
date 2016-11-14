@@ -8,6 +8,10 @@ namespace AlphaS.DataAnalyzer
 {
     public interface IDataAnalyzer
     {
+        void setStockType(string type);
+
+        void set0050BasicData(List<BasicDailyDataInformation> BasicData0050);
+
         void setAnalyzedData(List<AnalyzedDataInformation> AnalyzedData);
         List<AnalyzedDataInformation>  getAnalyzedData();
 
@@ -16,6 +20,7 @@ namespace AlphaS.DataAnalyzer
 
         string getDisplay();
        
-        void calculateDivideData();
+        void standarizeAnalyzeData();
+        void calculateParameter();
     }
 }

@@ -26,6 +26,10 @@ namespace AlphaS
             success = int.TryParse(input, out result);
             return result;
         }
+        public static bool getBoolFromString(this string input)
+        {
+            return input == "1";
+        }
         public static decimal getDecimalFromString(this string input)
         {
             bool success = false;
@@ -42,6 +46,16 @@ namespace AlphaS
             }
             success = decimal.TryParse(input, out result);
             return result;
+        }
+
+        public static decimal getDecimalFromDouble(this double input)
+        {
+            return Convert.ToDecimal(input);
+        }
+
+        public static double getDoubleFromDecimal(this decimal input)
+        {
+            return Convert.ToDouble(input);
         }
 
         public static Double getDoubleFromString(this string input)
