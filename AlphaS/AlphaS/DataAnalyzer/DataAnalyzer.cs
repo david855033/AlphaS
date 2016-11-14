@@ -118,9 +118,9 @@ namespace AlphaS.DataAnalyzer
 
                 newAnalyzedData.setNprice();
 
-                foreach (var emptydate in emptyDateList)
+                if (recentEmptyDateList.Contains(newAnalyzedData.date))
                 {
-
+                    newAnalyzedData.recentEmpty = true;
                 }
 
                 analyzedData.Add(newAnalyzedData);
@@ -130,6 +130,7 @@ namespace AlphaS.DataAnalyzer
         private void generateEmptyandRecentEmptyDateList()
         {
             emptyDateList = new List<DateTime>();
+            recentEmptyDateList = new List<DateTime>();
             if (basicData0050 == null)
             {
                 addDisplay($"no need to count empty");
@@ -139,11 +140,18 @@ namespace AlphaS.DataAnalyzer
                 var datesIn0050 = basicData0050.Select(x => x.date).ToArray();
                 var dateInThisBasicData = basicDailyData.Select(x => x.date).ToArray();
 
+                int RecentEmptyCount = 0;
                 for (int i = 0; i < datesIn0050.Length; i++)
                 {
                     if (Array.BinarySearch(dateInThisBasicData, datesIn0050[i]) < 0)
                     {
                         emptyDateList.Add(datesIn0050[i]);
+                        RecentEmptyCount = 120;
+                    }
+                    if (RecentEmptyCount > 0)
+                    {
+                        recentEmptyDateList.Add(datesIn0050[i]);
+                        RecentEmptyCount--;
                     }
                 }
 
@@ -172,7 +180,7 @@ namespace AlphaS.DataAnalyzer
             display = "";
             var calculators = new List<BaseParameterCalculator>();
             calculators.Add(new ChangeCalculator(analyzedData, addDisplay));
-
+            calculators.Add(new BiasFromMeanAverageCalculator(analyzedData, addDisplay));
             foreach (var c in calculators) c.calculate();
 
         }

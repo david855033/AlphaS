@@ -8,6 +8,8 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
 {
     abstract class BaseParameterCalculator
     {
+        protected const int PRE_DATA = 120;
+
         public BaseParameterCalculator(List<AnalyzedDataInformation> AnalyzedData, addDisplayDel addDisplay)
         {
             setAnalyzedData(AnalyzedData);
@@ -26,19 +28,18 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
             addDisplay = theDelegate;
         }
 
-        protected int parameterIndex, existAnalyzeDataCount, lastParameterDataIndex, startCalculationIndex;
-        protected int PRE_DATA;
+        protected int mainParameterIndex, existAnalyzeDataCount, lastParameterDataIndex, startCalculationIndex;
         protected string MAIN_PARAMETER;
 
         public void calculate()
         {
-            parameterIndex = AnalyzedDataInformation.parameterIndex[MAIN_PARAMETER];
-            addDisplay($"Main Parameter: {MAIN_PARAMETER}, index = {parameterIndex}, Predata = {PRE_DATA}");
+            mainParameterIndex = AnalyzedDataInformation.parameterIndex[MAIN_PARAMETER];
+            addDisplay($"Main Parameter: {MAIN_PARAMETER}, index = {mainParameterIndex}, Predata = {PRE_DATA}");
 
             existAnalyzeDataCount = AnalyzedData.Count;
             addDisplay($"- exist Analyze Data Count = {existAnalyzeDataCount}");
 
-            lastParameterDataIndex = AnalyzedData.FindLastIndex(x => x.parameters[parameterIndex].HasValue);
+            lastParameterDataIndex = AnalyzedData.FindLastIndex(x => x.parameters[mainParameterIndex].HasValue);
             addDisplay($"- exist Parameter Data Count = {lastParameterDataIndex + 1}");
 
             if (lastParameterDataIndex >= existAnalyzeDataCount - 1)

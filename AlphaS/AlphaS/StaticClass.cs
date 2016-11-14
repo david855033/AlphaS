@@ -58,6 +58,19 @@ namespace AlphaS
             return Convert.ToDouble(input);
         }
 
+        public static double round(this double input, int deci)
+        {
+            return Math.Round(input, deci);
+        }
+        public static decimal round(this decimal? input, int deci)
+        {
+            return Math.Round(input.Value, deci);
+        }
+        public static decimal round(this decimal input, int deci)
+        {
+            return Math.Round(input, deci);
+        }
+
         public static Double getDoubleFromString(this string input)
         {
             bool success = false;
