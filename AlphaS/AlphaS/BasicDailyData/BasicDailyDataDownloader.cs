@@ -76,23 +76,6 @@ namespace AlphaS.BasicDailyData
             }
             printMissionList();
         }
-        void analyzeHTML(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            if (missionList.Count == 0)
-            {
-                webBrowser.DocumentCompleted -= analyzeHTML;
-            }
-            else if (currentMission == missionList.First())
-            {
-                try
-                {
-                    recordDataInWebBrowser(webBrowser.Document);
-                    querySend = false;
-                }
-                catch
-                { }
-            }
-        }
         void assignMission()
         {
             if (missionList.Count > 0)
@@ -111,6 +94,115 @@ namespace AlphaS.BasicDailyData
         {
             Thread.Sleep(200);
             selectIDandDateThenDoQuery(currentWebSiteStockType);
+        }
+
+        private void changeWebSite(WebBrowser webBrowser, string type)
+        {
+            if (type == "A")
+            {
+                webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+            }
+            else if (type == "B")
+            {
+                webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
+            }
+            currentWebSiteStockType = type;
+            currentMission = null;
+        }
+
+        private void selectIDandDateThenDoQuery(string currentWebSiteStockType)
+        {
+            try
+            {
+
+                if (currentWebSiteStockType == "A")
+                {
+                    selectIDandDateThenDoQueryA();
+                }
+                else
+                {
+                    selectIDandDateThenDoQueryB();
+                }
+            }
+            catch
+            {
+            }
+        }
+        private void selectIDandDateThenDoQueryA()
+        {
+            var query_year = webBrowser.Document.GetElementById("query_year");
+            var query_month = webBrowser.Document.GetElementById("query_month");
+            var CO_ID = webBrowser.Document.GetElementById("CO_ID");
+            var query_button = webBrowser.Document.GetElementById("query-button");
+            CO_ID.InnerText = currentMission.ID;
+            foreach (HtmlElement opt in query_year.Children)
+            {
+                if (opt.GetAttribute("value") == currentMission.year.ToString())
+                {
+                    opt.SetAttribute("selected", "selected");
+                    break;
+                }
+            }
+            foreach (HtmlElement opt in query_month.Children)
+            {
+                if (opt.GetAttribute("value") == currentMission.month.ToString())
+                {
+                    opt.SetAttribute("selected", "selected");
+                    break;
+                }
+            }
+            Thread.Sleep(200);
+            query_button.InvokeMember("click");
+        }
+        private void selectIDandDateThenDoQueryB()
+        {
+            const int WAIT_RESP_TIME = 15;
+            changeEnglishTyping();
+            var input_date = webBrowser.Document.GetElementById("input_date");
+            var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
+
+            input_date.Focus();
+            Thread.Sleep(WAIT_RESP_TIME);
+            sendDels();
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
+            Thread.Sleep(WAIT_RESP_TIME * 25);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            input_date.RemoveFocus();
+
+            input_stock_code.Focus();
+            Thread.Sleep(WAIT_RESP_TIME);
+            sendDels();
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            System.Windows.Forms.SendKeys.SendWait($"{currentMission.ID}");
+            Thread.Sleep(WAIT_RESP_TIME * 25);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            input_stock_code.RemoveFocus();
+
+            //****(非使用event呼叫)
+            analyzeHTML(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));
+            Thread.Sleep(WAIT_RESP_TIME * 15);
+
+        }
+
+        void analyzeHTML(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            if (missionList.Count == 0)
+            {
+                webBrowser.DocumentCompleted -= analyzeHTML;
+            }
+            else if (currentMission == missionList.First())
+            {
+                try
+                {
+                    recordDataInWebBrowser(webBrowser.Document);
+                    querySend = false;
+                }
+                catch
+                { }
+            }
         }
 
         int nullcount = 0;
@@ -210,7 +302,6 @@ namespace AlphaS.BasicDailyData
             }
         }
 
-
         List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
             string s = getContentFromtbody(tableInnerHTML);
@@ -292,98 +383,6 @@ namespace AlphaS.BasicDailyData
                 result.Add(thisRow.ToArray());
             }
             return result;
-        }
-
-        private void changeWebSite(WebBrowser webBrowser, string type)
-        {
-            if (type == "A")
-            {
-                webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
-            }
-            else if (type == "B")
-            {
-                webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
-            }
-            currentWebSiteStockType = type;
-            currentMission = null;
-        }
-
-        private void selectIDandDateThenDoQuery(string currentWebSiteStockType)
-        {
-            try
-            {
-
-                if (currentWebSiteStockType == "A")
-                {
-                    selectIDandDateThenDoQueryA();
-                }
-                else
-                {
-                    selectIDandDateThenDoQueryB();
-                }
-            }
-            catch
-            {
-            }
-        }
-        private void selectIDandDateThenDoQueryA()
-        {
-            var query_year = webBrowser.Document.GetElementById("query_year");
-            var query_month = webBrowser.Document.GetElementById("query_month");
-            var CO_ID = webBrowser.Document.GetElementById("CO_ID");
-            var query_button = webBrowser.Document.GetElementById("query-button");
-            CO_ID.InnerText = currentMission.ID;
-            foreach (HtmlElement opt in query_year.Children)
-            {
-                if (opt.GetAttribute("value") == currentMission.year.ToString())
-                {
-                    opt.SetAttribute("selected", "selected");
-                    break;
-                }
-            }
-            foreach (HtmlElement opt in query_month.Children)
-            {
-                if (opt.GetAttribute("value") == currentMission.month.ToString())
-                {
-                    opt.SetAttribute("selected", "selected");
-                    break;
-                }
-            }
-            Thread.Sleep(200);
-            query_button.InvokeMember("click");
-        }
-        private void selectIDandDateThenDoQueryB()
-        {
-            const int WAIT_RESP_TIME = 20;
-            changeEnglishTyping();
-            var input_date = webBrowser.Document.GetElementById("input_date");
-            var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
-
-            input_stock_code.Focus();
-            Thread.Sleep(WAIT_RESP_TIME);
-            sendDels();
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait($"{currentMission.ID}");
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait("{ESC}");
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME * 2);
-            input_stock_code.RemoveFocus();
-
-            input_date.Focus();
-            Thread.Sleep(WAIT_RESP_TIME);
-            sendDels();
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait("{ESC}");
-            Thread.Sleep(WAIT_RESP_TIME);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME * 2);
-            input_date.RemoveFocus();
-            //****
-            analyzeHTML(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));
         }
 
         private void changeEnglishTyping()

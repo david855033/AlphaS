@@ -181,6 +181,8 @@ namespace AlphaS.DataAnalyzer
             var calculators = new List<BaseParameterCalculator>();
             calculators.Add(new ChangeCalculator(analyzedData, addDisplay));
             calculators.Add(new BiasFromMeanAverageCalculator(analyzedData, addDisplay));
+            calculators.Add(new AverageVolumeCalculator(analyzedData, addDisplay));
+            calculators.Add(new AverageCostCalculator (analyzedData, addDisplay));
             foreach (var c in calculators) c.calculate();
 
         }
