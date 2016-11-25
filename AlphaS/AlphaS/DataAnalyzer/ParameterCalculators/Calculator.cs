@@ -14,42 +14,32 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
             addParameter("Change");
             addParameter("ChangeAvg");
 
-            addParameter("MA5");
-            addParameter("MA20");
-            addParameter("MA40");
-            addParameter("MA60");
-            addParameter("MA120");
+            foreach (int day in new int[] { 5, 20, 40, 60, 120 })
+            {
+                addParameter($"MA{day}");
+                addParameter($"BA{day}");
+                foreach (int day_base in new int[] { 5, 20, 40, 60, 120 })
+                {
+                    if (day_base > day)
+                    {
+                        addParameter($"BA{day}_{day_base}");
+                    }
+                }
+            }
 
-            addParameter("BA5");
-            addParameter("BA20");
-            addParameter("BA40");
-            addParameter("BA60");
-            addParameter("BA120");
-            addParameter("BA5_20");
-            addParameter("BA5_40");
-            addParameter("BA5_60");
-            addParameter("BA5_120");
-            addParameter("BA20_40");
-            addParameter("BA20_60");
-            addParameter("BA20_120");
-            addParameter("BA40_60");
-            addParameter("BA40_120");
-            addParameter("BA60_120");
+            foreach (int day in new int[] { 5, 20, 60, 120 })
+            {
+                addParameter($"VMA{day}");
+                addParameter($"VBA{day}");
+                foreach (int day_base in new int[] { 5, 20, 60, 120 })
+                {
+                    if (day_base > day)
+                    {
+                        addParameter($"VBA{day}_{day_base}");
+                    }
+                }
+            }
 
-            addParameter("VMA5");
-            addParameter("VMA20");
-            addParameter("VMA60");
-            addParameter("VMA120");
-            addParameter("VBA5");
-            addParameter("VBA20");
-            addParameter("VBA60");
-            addParameter("VBA120");
-            addParameter("VBA5_20");
-            addParameter("VBA5_60");
-            addParameter("VBA5_120");
-            addParameter("VBA20_60");
-            addParameter("VBA20_120");
-            addParameter("VBA60_120");
             foreach (int day in new int[] { 5, 20, 40, 60, 120 })
             {
                 addParameter($"VolumeSum{day}");
@@ -57,6 +47,19 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 addParameter($"MeanCost{day}");
                 addParameter($"PriceCostBias{day}");
                 addParameter($"AverageCostBias{day}");
+            }
+
+            foreach (int day in new int[] { 5, 20, 40, 60 })
+            {
+                addParameter($"MeanVolumePerOrder{day}");
+                addParameter($"BiasVolumePerOrder{day}");
+                foreach (int day_base in new int[] { 5, 20, 40, 60 })
+                {
+                    if (day_base > day)
+                    {
+                        addParameter($"BiasVolumePerOrder{day}_{day_base}");
+                    }
+                }
             }
 
             using (var sw = new StreamWriter(CoreNS.Core.DEFAULT_FOLDER + @"\parameters.txt"))
@@ -295,8 +298,73 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
             addDisplay(s.TrimEnd('/'));
         }
     }
-    //MeanPrice
+
+    class VolumePerOrderCalculator : BaseParameterCalculator
+    {
+        public VolumePerOrderCalculator(List<AnalyzedDataInformation> AnalyzedData, addDisplayDel addDisplay) : base(AnalyzedData, addDisplay) { setInitialValues(); }
+        void setInitialValues()
+        {
+            MAIN_PARAMETER = "MeanVolumePerOrder5";
+        }
+        public override void generateParameter()
+        {
+            int[] days = { 5, 20, 40, 60 };
+
+            string s = "- analyze: Mean Volume Per Order";
+            foreach (var averageDay in days)
+            {
+                int parameterIndexMA = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{averageDay}"];
+                int parameterIndexBA = AnalyzedDataInformation.parameterIndex[$"BiasVolumePerOrder{averageDay}"];
+                s += averageDay + "/";
+                for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+                {
+                    decimal divider = Convert.ToDecimal(averageDay);
+                    decimal MeanVolumePerOrder;
+                    if (i == PRE_DATA)
+                    {
+                        decimal sum = 0;
+                        for (int j = PRE_DATA; j > PRE_DATA - averageDay; j--)
+                            sum += AnalyzedData[j].volumePerOrder;
+                        MeanVolumePerOrder = sum / averageDay;
+                    }
+                    else {
+                        decimal lastMA = AnalyzedData[i - 1].parameters[parameterIndexMA].Value;
+                        decimal new_volumePerOrder = AnalyzedData[i].volumePerOrder;
+                        decimal old_volumePerOrder = AnalyzedData[Math.Max(i - averageDay, 0)].volumePerOrder;
+                        MeanVolumePerOrder = (lastMA + (new_volumePerOrder - old_volumePerOrder) / divider);
+                    }
+
+
+                    AnalyzedData[i].parameters[parameterIndexMA] = MeanVolumePerOrder;
+
+                    AnalyzedData[i].parameters[parameterIndexBA] =
+                        ((AnalyzedData[i].volumePerOrder - MeanVolumePerOrder) / MeanVolumePerOrder * 100).round(2);
+                }
+            }
+            for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+            {
+                for (int x = 0; x < days.Length - 1; x++)
+                {
+                    for (int y = x + 1; y < days.Length; y++)
+                    {
+                        int day1 = days[x];
+                        int day2 = days[y];
+                        int parameterIndexBA = AnalyzedDataInformation.parameterIndex[$"BiasVolumePerOrder{day1}_{day2}"];
+                        int parameterIndexMA1 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day1}"];
+                        int parameterIndexMA2 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day2}"];
+
+                        AnalyzedData[i].parameters[parameterIndexBA] =
+                            (AnalyzedData[i].parameters[parameterIndexMA1] /
+                            AnalyzedData[i].parameters[parameterIndexMA2] * 100 - 100).round(2);
+                    }
+                }
+            }
+            addDisplay(s.TrimEnd('/'));
+        }
+    }
+    
+
     //KDJ
-    //PerDeal
-    //
+
+
 }

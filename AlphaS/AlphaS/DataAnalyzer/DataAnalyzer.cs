@@ -183,6 +183,7 @@ namespace AlphaS.DataAnalyzer
             calculators.Add(new BiasFromMeanAverageCalculator(analyzedData, addDisplay));
             calculators.Add(new AverageVolumeCalculator(analyzedData, addDisplay));
             calculators.Add(new AverageCostCalculator (analyzedData, addDisplay));
+            calculators.Add(new VolumePerOrderCalculator(analyzedData, addDisplay));
             foreach (var c in calculators) c.calculate();
 
         }
