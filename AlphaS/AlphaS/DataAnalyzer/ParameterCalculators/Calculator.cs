@@ -62,6 +62,26 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 }
             }
 
+            foreach (int day in new int[] { 5, 20, 40, 60 })
+            {
+                addParameter($"RSV{day}");
+                addParameter($"K{day}");
+                addParameter($"D{day}");
+                addParameter($"J{day}");
+            }
+
+            foreach (int day in new int[] { 5, 20, 40, 60 })
+            {
+                addParameter($"RSI{day}");
+                foreach (int day_base in new int[] { 5, 20, 40, 60 })
+                {
+                    if (day_base > day)
+                    {
+                        addParameter($"RSI{day}_{day_base}");
+                    }
+                }
+            }
+
             using (var sw = new StreamWriter(CoreNS.Core.DEFAULT_FOLDER + @"\parameters.txt"))
             {
                 foreach (var p in AnalyzedDataInformation.parameterIndex.Keys)
@@ -70,6 +90,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 }
             }
         }
+
         static void addParameter(string parameterName)
         {
             AnalyzedDataInformation.parameterIndex.Add(parameterName, AnalyzedDataInformation.parameterIndex.Count);
@@ -362,9 +383,148 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
             addDisplay(s.TrimEnd('/'));
         }
     }
-    
 
-    //KDJ
+
+    class KDJCalculator : BaseParameterCalculator
+    {
+        public KDJCalculator(List<AnalyzedDataInformation> AnalyzedData, addDisplayDel addDisplay) : base(AnalyzedData, addDisplay) { setInitialValues(); }
+        void setInitialValues()
+        {
+            MAIN_PARAMETER = "RSV5";
+        }
+        public override void generateParameter()
+        {
+            int[] dayToCountList = { 5, 20, 40, 60 };
+
+            string s = "- analyze: KDJ calculator";
+            foreach (var dayToCount in dayToCountList)
+            {
+                int parameterIndexRSV = AnalyzedDataInformation.parameterIndex[$"RSV{dayToCount}"];
+                int parameterIndexK = AnalyzedDataInformation.parameterIndex[$"K{dayToCount}"];
+                int parameterIndexD = AnalyzedDataInformation.parameterIndex[$"D{dayToCount}"];
+                int parameterIndexJ = AnalyzedDataInformation.parameterIndex[$"J{dayToCount}"];
+
+                s += dayToCount + "/";
+                decimal lastK = 50, lastD = 50;
+                for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+                {
+                    decimal highInDays = 0, lowInDays = 0;
+                    for (int d = Math.Max(i - dayToCount + 1, 0); d <= i; d++)
+                    {
+                        highInDays = Math.Max(AnalyzedData[d].N_high, highInDays);
+                        if (lowInDays == 0) lowInDays = AnalyzedData[d].N_low;
+                        else { lowInDays = Math.Min(AnalyzedData[d].N_low, lowInDays); }
+                    }
+
+
+                    decimal currentRSV = 50;
+                    if (lowInDays != highInDays)
+                    {
+                        currentRSV = ((AnalyzedData[i].N_close - lowInDays) / (highInDays - lowInDays) * 100).round(2);
+                    }
+                    decimal currentK = ((lastK * 2 + currentRSV) / 3).round(2);
+                    decimal currentD = ((lastD * 2 + currentK) / 3).round(2);
+                    decimal currentJ = 3 * currentD - 2 * currentK;
+
+                    AnalyzedData[i].parameters[parameterIndexRSV] = currentRSV;
+                    AnalyzedData[i].parameters[parameterIndexK] = lastK = currentK;
+                    AnalyzedData[i].parameters[parameterIndexD] = lastD = currentD;
+                    AnalyzedData[i].parameters[parameterIndexJ] = currentJ;
+
+                }
+            }
+
+
+            addDisplay(s.TrimEnd('/'));
+        }
+    }
+
+    class RSICalculator : BaseParameterCalculator
+    {
+        public RSICalculator(List<AnalyzedDataInformation> AnalyzedData, addDisplayDel addDisplay) : base(AnalyzedData, addDisplay) { setInitialValues(); }
+        void setInitialValues()
+        {
+            MAIN_PARAMETER = "RSI5";
+        }
+        public override void generateParameter()
+        {
+            int[] days = { 5, 20, 40, 60 };
+
+            string s = "- analyze: RSI";
+            foreach (var dayToCount in days)
+            {
+                int parameterIndexRSI = AnalyzedDataInformation.parameterIndex[$"RSI{dayToCount}"];
+                s += dayToCount + "/";
+
+                decimal incresingSum = 0, decreasingSum = 0;
+                for (int i = startCalculationIndex - dayToCount; i < startCalculationIndex; i++)
+                {
+                    decimal N_change = AnalyzedData[i].N_close - AnalyzedData[i - 1].N_close;
+                    if (N_change > 0) { incresingSum += N_change; }
+                    else { decreasingSum += N_change * -1; }
+                }
+
+                for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+                {
+                    decimal N_change_head = AnalyzedData[i].N_close - AnalyzedData[i - 1].N_close;
+                    if (N_change_head > 0) { incresingSum += N_change_head; }
+                    else { decreasingSum += N_change_head * -1; }
+
+                    decimal N_change_tail = AnalyzedData[i - dayToCount].N_close - AnalyzedData[i - 1 - dayToCount].N_close;
+                    if (N_change_tail > 0) { incresingSum -= N_change_tail; }
+                    else { decreasingSum -= N_change_tail * -1; }
+
+                    decimal currentRSI = (incresingSum / (incresingSum + decreasingSum) * 100).round(2);
+
+                    AnalyzedData[i].parameters[parameterIndexRSI] = currentRSI;
+                }
+                /*
+
+                    decimal MeanVolumePerOrder;
+                    if (i == PRE_DATA)
+                    {
+                        decimal sum = 0;
+                        for (int j = PRE_DATA; j > PRE_DATA - dayToCount; j--)
+                            sum += AnalyzedData[j].volumePerOrder;
+                        MeanVolumePerOrder = sum / dayToCount;
+                    }
+                    else {
+                        decimal lastMA = AnalyzedData[i - 1].parameters[parameterIndexMA].Value;
+                        decimal new_volumePerOrder = AnalyzedData[i].volumePerOrder;
+                        decimal old_volumePerOrder = AnalyzedData[Math.Max(i - dayToCount, 0)].volumePerOrder;
+                        MeanVolumePerOrder = (lastMA + (new_volumePerOrder - old_volumePerOrder) / divider);
+                    }
+
+
+                    AnalyzedData[i].parameters[parameterIndexMA] = MeanVolumePerOrder;
+
+                    AnalyzedData[i].parameters[parameterIndexBA] =
+                        ((AnalyzedData[i].volumePerOrder - MeanVolumePerOrder) / MeanVolumePerOrder * 100).round(2);
+                }
+            }
+            for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+            {
+                for (int x = 0; x < days.Length - 1; x++)
+                {
+                    for (int y = x + 1; y < days.Length; y++)
+                    {
+                        int day1 = days[x];
+                        int day2 = days[y];
+                        int parameterIndexBA = AnalyzedDataInformation.parameterIndex[$"BiasVolumePerOrder{day1}_{day2}"];
+                        int parameterIndexMA1 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day1}"];
+                        int parameterIndexMA2 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day2}"];
+
+                        AnalyzedData[i].parameters[parameterIndexBA] =
+                            (AnalyzedData[i].parameters[parameterIndexMA1] /
+                            AnalyzedData[i].parameters[parameterIndexMA2] * 100 - 100).round(2);
+                    }
+            */
+
+            }
+            addDisplay(s.TrimEnd('/'));
+        }
+    }
+
 
 
 }

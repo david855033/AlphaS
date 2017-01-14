@@ -174,8 +174,8 @@ namespace AlphaS.DataAnalyzer
             return startWeight;
         }
 
-
-        public void calculateParameter()
+        
+        public void calculateParameter()//新增的計算機掛在這邊
         {
             display = "";
             var calculators = new List<BaseParameterCalculator>();
@@ -184,6 +184,8 @@ namespace AlphaS.DataAnalyzer
             calculators.Add(new AverageVolumeCalculator(analyzedData, addDisplay));
             calculators.Add(new AverageCostCalculator (analyzedData, addDisplay));
             calculators.Add(new VolumePerOrderCalculator(analyzedData, addDisplay));
+            calculators.Add(new KDJCalculator(analyzedData, addDisplay));
+            calculators.Add(new RSICalculator(analyzedData, addDisplay));
             foreach (var c in calculators) c.calculate();
 
         }
