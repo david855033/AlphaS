@@ -74,7 +74,7 @@ namespace AlphaS.Forms
             viewModel.display = "";
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
-                viewModel.display += $"[CalculateParameter ID = {ID}]\r\n";
+                viewModel.display += $"[GetFuturePrice ID = {ID}]\r\n";
                 dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
 
@@ -84,6 +84,24 @@ namespace AlphaS.Forms
                 Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
                 viewModel.display += "\r\n";
             }
+        }
+
+        private void GetFulturePrice(object sender, RoutedEventArgs e)
+        {
+            //IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
+            //viewModel.display = "";
+            //foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            //{
+            //    viewModel.display += $"[CalculateParameter ID = {ID}]\r\n";
+            //    dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
+            //    dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
+
+            //    dataAnalyzer.calculateParameter();
+            //    viewModel.display += dataAnalyzer.getDisplay();
+
+            //    Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
+            //    viewModel.display += "\r\n";
+            //}
         }
     }
 }

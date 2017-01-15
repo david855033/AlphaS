@@ -474,53 +474,36 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                     if (N_change_tail > 0) { incresingSum -= N_change_tail; }
                     else { decreasingSum -= N_change_tail * -1; }
 
-                    decimal currentRSI = (incresingSum / (incresingSum + decreasingSum) * 100).round(2);
+                    decimal currentRSI = 50;
+                    if (incresingSum + decreasingSum != 0)
+                    {
+                        currentRSI = (incresingSum / (incresingSum + decreasingSum) * 100).round(2);
+                    }
 
                     AnalyzedData[i].parameters[parameterIndexRSI] = currentRSI;
                 }
-                /*
+            }
 
-                    decimal MeanVolumePerOrder;
-                    if (i == PRE_DATA)
+            foreach (var dayToCount in days)
+            {
+                foreach (int day_base in new int[] { 5, 20, 40, 60 })
+                {
+                    int parameterIndexRSI = AnalyzedDataInformation.parameterIndex[$"RSI{dayToCount}"];
+                    if (day_base > dayToCount)
                     {
-                        decimal sum = 0;
-                        for (int j = PRE_DATA; j > PRE_DATA - dayToCount; j--)
-                            sum += AnalyzedData[j].volumePerOrder;
-                        MeanVolumePerOrder = sum / dayToCount;
+                        int parameterIndexRSI_Cross;
+                        parameterIndexRSI_Cross = AnalyzedDataInformation.parameterIndex[$"RSI{dayToCount}_{day_base}"];
+                        int parameterIndexRSI_Base = AnalyzedDataInformation.parameterIndex[$"RSI{day_base}"]; ;
+                        for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
+                        {
+                            AnalyzedData[i].parameters[parameterIndexRSI_Cross] =
+                                AnalyzedData[i].parameters[parameterIndexRSI] -
+                                AnalyzedData[i].parameters[parameterIndexRSI_Base];
+                        }
                     }
-                    else {
-                        decimal lastMA = AnalyzedData[i - 1].parameters[parameterIndexMA].Value;
-                        decimal new_volumePerOrder = AnalyzedData[i].volumePerOrder;
-                        decimal old_volumePerOrder = AnalyzedData[Math.Max(i - dayToCount, 0)].volumePerOrder;
-                        MeanVolumePerOrder = (lastMA + (new_volumePerOrder - old_volumePerOrder) / divider);
-                    }
-
-
-                    AnalyzedData[i].parameters[parameterIndexMA] = MeanVolumePerOrder;
-
-                    AnalyzedData[i].parameters[parameterIndexBA] =
-                        ((AnalyzedData[i].volumePerOrder - MeanVolumePerOrder) / MeanVolumePerOrder * 100).round(2);
                 }
             }
-            for (int i = startCalculationIndex; i < existAnalyzeDataCount; i++)
-            {
-                for (int x = 0; x < days.Length - 1; x++)
-                {
-                    for (int y = x + 1; y < days.Length; y++)
-                    {
-                        int day1 = days[x];
-                        int day2 = days[y];
-                        int parameterIndexBA = AnalyzedDataInformation.parameterIndex[$"BiasVolumePerOrder{day1}_{day2}"];
-                        int parameterIndexMA1 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day1}"];
-                        int parameterIndexMA2 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day2}"];
 
-                        AnalyzedData[i].parameters[parameterIndexBA] =
-                            (AnalyzedData[i].parameters[parameterIndexMA1] /
-                            AnalyzedData[i].parameters[parameterIndexMA2] * 100 - 100).round(2);
-                    }
-            */
-
-            }
             addDisplay(s.TrimEnd('/'));
         }
     }

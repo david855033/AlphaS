@@ -68,7 +68,6 @@ namespace AlphaS.BasicDailyData
         {
             var that = (BasicDailyDataInformation)obj;
             return this.date.CompareTo(that.date);
-
         }
     }
 }

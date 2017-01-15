@@ -16,6 +16,7 @@
             <TextBlock FontSize="15" Margin="0,20">Function</TextBlock>
             <Button Click="UpdateDiv">UpdateDiv</Button>
             <Button Click="CalculateParameter">Parameter</Button>
+            <Button Click="GetFulturePrice">GetFuturePrice</Button>
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding display}" Padding="20,0,0,0"/>
     </Grid>
