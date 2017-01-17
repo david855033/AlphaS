@@ -48,14 +48,34 @@ namespace AlphaS.DataAnalyzer
             string filepath = _baseFolder + $@"\{parameterName}_ParameterFuturePriceTable.txt";
             using (var sw = new StreamWriter(filepath, false, Encoding.Default))
             {
-                var toWrite = FuturePriceDataToWrite.ToList();
-                toWrite.Sort();
-                foreach (var r in toWrite)
+                foreach (var r in FuturePriceDataToWrite) //不做sort*
                 {
                     sw.WriteLine(r.ToString());
                 }
             }
         }
 
+        public void appendParameterFuturePrice(string parameterName, ParameterFuturePriceTableInformation dataToAppend)
+        {
+            string filepath = _baseFolder + $@"\{parameterName}_ParameterFuturePriceTable.txt";
+            using (var sw = new StreamWriter(filepath, true, Encoding.Default))
+            {
+                sw.WriteLine(dataToAppend.ToString());
+            }
+        }
+
+        public void appendParameterFuturePrice(string parameterName, List<ParameterFuturePriceTableInformation> dataToAppend)
+        {
+            string filepath = _baseFolder + $@"\{parameterName}_ParameterFuturePriceTable.txt";
+            using (var sw = new StreamWriter(filepath, true, Encoding.Default))
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var r in dataToAppend)
+                {
+                    sb.AppendLine(r.ToString());
+                }
+                sw.WriteLine(sb.ToString());
+            }
+        }
     }
 }

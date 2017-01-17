@@ -62,7 +62,7 @@ namespace AlphaS.Forms
 
                 dataAnalyzer.standarizeAnalyzeData();
                 viewModel.display += dataAnalyzer.getDisplay();
-             
+
                 Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
                 viewModel.display += "\r\n";
             }
@@ -105,31 +105,31 @@ namespace AlphaS.Forms
 
                 Core.futurePriceDataManager.saveFuturePriceData(ID, dataAnalyzer.getFuturePriceData());
                 viewModel.display += "\r\n";
-            
             }
         }
 
-        private void GetParameterFuturePriceTable(object sender, RoutedEventArgs e)
+        private void AppendParameterFuturePriceTable(object sender, RoutedEventArgs e)
         {
             //TODO
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
-            var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
+            
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
-                if (ID != "0050") dataAnalyzer.set0050BasicData(basicData0050);
-
-                viewModel.display += $"[GetFulturePrice ID = {ID}]\r\n";
-                dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
+                viewModel.display += $"[Append Parameter Future Price, ID = {ID}]\r\n";
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
                 dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
+                var allDataToAppend = new Dictionary<string, List<ParameterFuturePriceTableInformation>>();
+                dataAnalyzer.getParameterFuturePriceTableDataToAppend(allDataToAppend);
+                foreach (var dataPair in allDataToAppend)
+                {
+                    string parameterName = dataPair.Key;
+                    List<ParameterFuturePriceTableInformation> dataToAppend = dataPair.Value;
+                    Core.parameterFuturePriceTableManager.appendParameterFuturePrice(parameterName, dataToAppend);
+                }
 
-                dataAnalyzer.calculateFuturePriceData();
                 viewModel.display += dataAnalyzer.getDisplay();
-
-                Core.futurePriceDataManager.saveFuturePriceData(ID, dataAnalyzer.getFuturePriceData());
                 viewModel.display += "\r\n";
-
             }
         }
     }

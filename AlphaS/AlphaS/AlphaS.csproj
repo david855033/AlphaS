@@ -70,6 +70,7 @@
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataMissionListGenerator.cs" />
+    <Compile Include="DataAnalyzer\ParameterFuturePriceTableManager.cs" />
     <Compile Include="DataAnalyzer\ParameterFuturePriceTableInformation.cs" />
     <Compile Include="DataAnalyzer\FuturePriceDataManager.cs" />
     <Compile Include="DataAnalyzer\FuturePriceDataInformation.cs" />

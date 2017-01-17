@@ -79,7 +79,7 @@ namespace AlphaS.DataAnalyzer
 
         public void setNprice()
         {
-            if (dealedStock > 0) { avg = volume / dealedStock; } else { avg = close; }
+            if (dealedStock >= 100) { avg = volume / dealedStock; } else { avg = close; }
             N_open = open * divideWeight.getDecimalFromDouble();
             N_high = high * divideWeight.getDecimalFromDouble();
             N_low = low * divideWeight.getDecimalFromDouble();

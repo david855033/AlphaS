@@ -201,7 +201,6 @@ namespace AlphaS.DataAnalyzer
         {
             this.futurePriceData = FuturePriceData;
         }
-
         public List<FuturePriceDataInformation> getFuturePriceData()
         {
             return futurePriceData;
@@ -240,11 +239,52 @@ namespace AlphaS.DataAnalyzer
                 for (int n = 0; n < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; n++)
                 {
                     int dayAfter = FuturePriceDataInformation.FUTURE_PRICE_DAYS[n];
-                    newFuturePriceData.futurePrices[n] = analyzedData[i + dayAfter - 1].N_avg;
+                    newFuturePriceData.futurePrices[n] =
+                        analyzedData[i + dayAfter - 1].N_avg / analyzedData[i].N_avg * 100 - 100;
                 }
 
                 futurePriceData.Add(newFuturePriceData);
             }
+        }
+
+
+        private List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData;
+        public void setParameterFuturePriceTableData(List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData)
+        {
+            this.parameterFuturePriceTableData = parameterFuturePriceTableData;
+        }
+        public List<ParameterFuturePriceTableInformation> getParameterFuturePriceTableData()
+        {
+            return parameterFuturePriceTableData;
+        }
+        //TODO
+        public void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend)
+        {
+            display = "";
+            var parameterIndex = AnalyzedDataInformation.parameterIndex;
+
+            var dateList = from q in futurePriceData select q.date;
+
+            foreach (var parameterNameAndIndex in parameterIndex)
+            {
+                foreach (var date in dateList)
+                {
+                    var matchedFuturePriceData = futurePriceData.Find(x => x.date == date);
+                    var matchedAnalyzedData = analyzedData.Find(x => x.date == date);
+                    var newParameterFuturePriceMatch = new ParameterFuturePriceTableInformation();
+                    newParameterFuturePriceMatch.parameterValue = matchedAnalyzedData.parameters[parameterNameAndIndex.Value].GetValueOrDefault();
+                    for (int i = 0; i < matchedFuturePriceData.futurePrices.Length; i++)
+                    {
+                        var currentFuturePrice = matchedFuturePriceData.futurePrices[i].GetValueOrDefault();
+                        var currentFuturePriceLog = Math.Log(((currentFuturePrice / 100) + 1).getDoubleFromDecimal());
+                    }
+                }
+            }
+        }
+        public void calculateParameterFuturePriceTable()
+        {
+            display = "";
+
         }
 
     }

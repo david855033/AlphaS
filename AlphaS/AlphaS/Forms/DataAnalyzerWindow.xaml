@@ -17,7 +17,7 @@
             <Button Click="UpdateDiv">UpdateDiv</Button>
             <Button Click="CalculateParameter">Parameter</Button>
             <Button Click="GetFulturePrice">GetFuturePrice</Button>
-            <Button Click="GetParameterFuturePriceTable">GetParameterFuturePriceTable</Button>
+            <Button Click="AppendParameterFuturePriceTable">AppendParameterFuturePriceTable</Button>
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding display}" Padding="20,0,0,0"/>
     </Grid>

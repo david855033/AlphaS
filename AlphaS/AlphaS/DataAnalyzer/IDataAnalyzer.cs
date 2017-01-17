@@ -21,10 +21,15 @@ namespace AlphaS.DataAnalyzer
         void setFuturePriceData(List<FuturePriceDataInformation> FuturePriceData);
         List<FuturePriceDataInformation> getFuturePriceData();
 
+        void setParameterFuturePriceTableData(List<ParameterFuturePriceTableInformation> FuturePriceData);
+        List<ParameterFuturePriceTableInformation> getParameterFuturePriceTableData();
+
         string getDisplay();
        
         void standarizeAnalyzeData();
         void calculateParameter();
         void calculateFuturePriceData();
+        void calculateParameterFuturePriceTable();
+        void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend);
     }
 }

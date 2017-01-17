@@ -21,6 +21,9 @@ namespace AlphaS.DataAnalyzer
             return this.parameterValue.CompareTo(that.parameterValue);
         }
 
+        public ParameterFuturePriceTableInformation()
+        {
+        }
         public ParameterFuturePriceTableInformation(string loadString)
         {
             var splitline = loadString.Split('\t');
