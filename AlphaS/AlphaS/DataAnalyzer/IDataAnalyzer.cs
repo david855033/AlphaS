@@ -12,18 +12,19 @@ namespace AlphaS.DataAnalyzer
 
         void set0050BasicData(List<BasicDailyDataInformation> BasicData0050);
 
-        void setBasicDailyData(List<BasicDailyDataInformation> setBasicDailyData);
+        void setBasicDailyData(List<BasicDailyDataInformation> BasicDailyData);
         List<BasicDailyDataInformation> getBasicDailyData();
 
         void setAnalyzedData(List<AnalyzedDataInformation> AnalyzedData);
         List<AnalyzedDataInformation>  getAnalyzedData();
 
-        void setFuturePriceData(List<FuturePriceDataInformation> AnalyzedData);
+        void setFuturePriceData(List<FuturePriceDataInformation> FuturePriceData);
         List<FuturePriceDataInformation> getFuturePriceData();
 
         string getDisplay();
        
         void standarizeAnalyzeData();
         void calculateParameter();
+        void calculateFuturePriceData();
     }
 }

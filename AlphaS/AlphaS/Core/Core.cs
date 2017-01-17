@@ -26,6 +26,12 @@ namespace AlphaS.CoreNS
         static readonly string ANALYZED_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "AnalyzedData";
         public static readonly IAnalyzedDataManager analyzedDataManager = new AnalyzedDataManager(ANALYZED_DATA_FOLDER);
 
+        static readonly string FUTURE_PRICE_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "FuturePriceData";
+        public static readonly IFuturePriceDataManager futurePriceDataManager = new FuturePriceDataManager(FUTURE_PRICE_DATA_FOLDER);
+
+        static readonly string PARAMETER_FUTURE_PRICE_TABLE_FOLDER = DEFAULT_FOLDER + "\\" + "ParameterFuturePriceTable";
+        public static readonly IParameterFuturePriceTableManager parameterFuturePriceTableManager = new ParameterFuturePriceTableManager(PARAMETER_FUTURE_PRICE_TABLE_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()

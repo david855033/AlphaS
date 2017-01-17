@@ -52,7 +52,9 @@ namespace AlphaS.BasicDailyData
                         var fileStatus = Core.basicDailyDataManager.getFileStatus(currentStock.ID);
                         int index = fileStatus.BinarySearch(new BasicDailyDataFileStatusInformation()
                         { year = currentYear.ToString(), month = currentMonth.ToString() });
-                        if ((index >= 0 && fileStatus[index].fileStatus == FileStatus.Temp) || index < 0)
+                        if ((index >= 0 &&
+                            (fileStatus[index].fileStatus == FileStatus.Temp || fileStatus[index].fileStatus == FileStatus.Null))
+                            || index < 0)
                         {
                             resultList.Add(toAdd);
                         }

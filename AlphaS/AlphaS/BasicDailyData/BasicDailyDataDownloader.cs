@@ -156,20 +156,10 @@ namespace AlphaS.BasicDailyData
         }
         private void selectIDandDateThenDoQueryB()
         {
-            const int WAIT_RESP_TIME = 15;
+            const int WAIT_RESP_TIME = 20;
             changeEnglishTyping();
             var input_date = webBrowser.Document.GetElementById("input_date");
             var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
-
-            input_date.Focus();
-            Thread.Sleep(WAIT_RESP_TIME);
-            sendDels();
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
-            Thread.Sleep(WAIT_RESP_TIME * 25);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            input_date.RemoveFocus();
 
             input_stock_code.Focus();
             Thread.Sleep(WAIT_RESP_TIME);
@@ -180,6 +170,16 @@ namespace AlphaS.BasicDailyData
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
             Thread.Sleep(WAIT_RESP_TIME * 10);
             input_stock_code.RemoveFocus();
+
+            input_date.Focus();
+            Thread.Sleep(WAIT_RESP_TIME);
+            sendDels();
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
+            Thread.Sleep(WAIT_RESP_TIME * 25);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            Thread.Sleep(WAIT_RESP_TIME * 10);
+            input_date.RemoveFocus();
 
             //****(非使用event呼叫)
             analyzeHTML(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));

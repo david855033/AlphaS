@@ -174,7 +174,6 @@ namespace AlphaS.DataAnalyzer
             return startWeight;
         }
 
-        
         public void calculateParameter()//新增的計算機掛在這邊
         {
             display = "";
@@ -182,12 +181,11 @@ namespace AlphaS.DataAnalyzer
             calculators.Add(new ChangeCalculator(analyzedData, addDisplay));
             calculators.Add(new BiasFromMeanAverageCalculator(analyzedData, addDisplay));
             calculators.Add(new AverageVolumeCalculator(analyzedData, addDisplay));
-            calculators.Add(new AverageCostCalculator (analyzedData, addDisplay));
+            calculators.Add(new AverageCostCalculator(analyzedData, addDisplay));
             calculators.Add(new VolumePerOrderCalculator(analyzedData, addDisplay));
             calculators.Add(new KDJCalculator(analyzedData, addDisplay));
             calculators.Add(new RSICalculator(analyzedData, addDisplay));
             foreach (var c in calculators) c.calculate();
-
         }
 
 
@@ -198,6 +196,56 @@ namespace AlphaS.DataAnalyzer
             return display;
         }
 
+        private List<FuturePriceDataInformation> futurePriceData;
+        public void setFuturePriceData(List<FuturePriceDataInformation> FuturePriceData)
+        {
+            this.futurePriceData = FuturePriceData;
+        }
+
+        public List<FuturePriceDataInformation> getFuturePriceData()
+        {
+            return futurePriceData;
+        }
+        public void calculateFuturePriceData()
+        {
+            display = "";
+            generateEmptyandRecentEmptyDateList();
+            int startCalculationIndex = 0;
+            int endCalculationIndex = 0;
+
+            int existFuturePriceDataCount = futurePriceData.Count;
+            addDisplay($"- exist Future Price Data Count = {existFuturePriceDataCount}");
+
+            int existAnalyzedDataCount = analyzedData.Count;
+            addDisplay($"- exist Analyzed Data Count = {existAnalyzedDataCount}");
+
+            int MAX_AFTER_DAYS = FuturePriceDataInformation.FUTURE_PRICE_DAYS.Last();
+            if (existFuturePriceDataCount + BaseParameterCalculator.PRE_DATA >= existAnalyzedDataCount - MAX_AFTER_DAYS)
+            {
+                addDisplay("- no new data to calculate");
+                return;
+            }
+            else
+            {
+                startCalculationIndex = Math.Max(BaseParameterCalculator.PRE_DATA, existFuturePriceDataCount + 1);
+                endCalculationIndex = existAnalyzedDataCount - MAX_AFTER_DAYS;
+                addDisplay($"- Calculate from index={startCalculationIndex} to {endCalculationIndex}");
+            }
+
+
+            for (int i = startCalculationIndex; i <= endCalculationIndex; i++)
+            {
+                var newFuturePriceData = new FuturePriceDataInformation(analyzedData[i]);
+
+                for (int n = 0; n < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; n++)
+                {
+                    int dayAfter = FuturePriceDataInformation.FUTURE_PRICE_DAYS[n];
+                    newFuturePriceData.futurePrices[n] = analyzedData[i + dayAfter - 1].N_avg;
+                }
+
+                futurePriceData.Add(newFuturePriceData);
+            }
+        }
 
     }
 }

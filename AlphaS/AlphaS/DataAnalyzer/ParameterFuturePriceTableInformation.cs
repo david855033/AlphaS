@@ -8,51 +8,50 @@ using System.Threading.Tasks;
 
 namespace AlphaS.DataAnalyzer
 {
-    public class FuturePriceDataInformation : IComparable
+    public class ParameterFuturePriceTableInformation : IComparable
     {
         public static int[] FUTURE_PRICE_DAYS = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80 };
 
-        public DateTime date;
-        public decimal?[] futurePrices = new decimal?[FUTURE_PRICE_DAYS.Length];
+        public decimal parameterValue;
+        public decimal?[] futurePricesLogs = new decimal?[FUTURE_PRICE_DAYS.Length];
 
         public int CompareTo(object obj)
         {
-            var that = (FuturePriceDataInformation)obj;
-            return this.date.CompareTo(that.date);
+            var that = (ParameterFuturePriceTableInformation)obj;
+            return this.parameterValue.CompareTo(that.parameterValue);
         }
 
-
-        public FuturePriceDataInformation(string loadString)
+        public ParameterFuturePriceTableInformation(string loadString)
         {
             var splitline = loadString.Split('\t');
             int i = 0;
-            date = splitline[i++].getDateTimeFromString();
+            parameterValue = splitline[i++].getDecimalFromString();
             if (splitline.Length > i)
             {
                 for (int x = i; x < splitline.Length; x++)
                 {
                     if (splitline[x] != "NA")
                     {
-                        futurePrices[x - i] = splitline[x].getDecimalFromString();
+                        futurePricesLogs[x - i] = splitline[x].getDecimalFromString();
                     }
                 }
             }
         }
 
-        public FuturePriceDataInformation(BasicDailyDataInformation basicDailyDataInformation)
+        public ParameterFuturePriceTableInformation(decimal parameterValue)
         {
-            date = basicDailyDataInformation.date;
+            this.parameterValue = parameterValue;
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(date.ToString("yyyy-MM-dd"));
-            for (int i = 0; i < futurePrices.Length; i++)
+            sb.Append(parameterValue.ToString());
+            for (int i = 0; i < futurePricesLogs.Length; i++)
             {
-                if (futurePrices[i] != null)
+                if (futurePricesLogs[i] != null)
                 {
-                    sb.Append("\t" + futurePrices[i].round(2).ToString());
+                    sb.Append("\t" + futurePricesLogs[i].round(4).ToString());
                 }
                 else
                 {

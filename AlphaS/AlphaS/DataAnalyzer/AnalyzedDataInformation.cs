@@ -91,29 +91,29 @@ namespace AlphaS.DataAnalyzer
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(date.ToString("yyyy-MM-dd"));
-            sb.Append("\t" + dealedStock.ToString());
-            sb.Append("\t" + volume.ToString());
-            sb.Append("\t" + open.ToString());
-            sb.Append("\t" + high.ToString());
-            sb.Append("\t" + low.ToString());
-            sb.Append("\t" + close.ToString());
-            sb.Append("\t" + change.ToString());
-            sb.Append("\t" + dealedOrder.ToString());
-            sb.Append("\t" + avg.ToString());
-            sb.Append("\t" + volumePerOrder.ToString());
+            sb.Append("\t" + dealedStock.round(2).ToString());
+            sb.Append("\t" + volume.round(2).ToString());
+            sb.Append("\t" + open.round(2).ToString());
+            sb.Append("\t" + high.round(2).ToString());
+            sb.Append("\t" + low.round(2).ToString());
+            sb.Append("\t" + close.round(2).ToString());
+            sb.Append("\t" + change.round(2).ToString());
+            sb.Append("\t" + dealedOrder.round(2).ToString());
+            sb.Append("\t" + avg.round(2).ToString());
+            sb.Append("\t" + volumePerOrder.round(2).round(2).ToString());
             sb.Append("\t" + (recentEmpty ? "1" : "0"));
-            sb.Append("\t" + divide.ToString());
-            sb.Append("\t" + divideWeight.ToString());
-            sb.Append("\t" + N_open.ToString());
-            sb.Append("\t" + N_high.ToString());
-            sb.Append("\t" + N_low.ToString());
-            sb.Append("\t" + N_close.ToString());
-            sb.Append("\t" + N_avg.ToString());
+            sb.Append("\t" + divide.round(2).ToString());
+            sb.Append("\t" + divideWeight.round(2).ToString());
+            sb.Append("\t" + N_open.round(2).ToString());
+            sb.Append("\t" + N_high.round(2).ToString());
+            sb.Append("\t" + N_low.round(2).ToString());
+            sb.Append("\t" + N_close.round(2).ToString());
+            sb.Append("\t" + N_avg.round(2).ToString());
             for (int i = 0; i < parameters.Length; i++)
             {
                 if (parameters[i].HasValue)
                 {
-                    sb.Append("\t" + parameters[i].ToString());
+                    sb.Append("\t" + parameters[i].round(2).ToString());
                 }
                 else
                 {

@@ -88,20 +88,49 @@ namespace AlphaS.Forms
 
         private void GetFulturePrice(object sender, RoutedEventArgs e)
         {
-            //IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
-            //viewModel.display = "";
-            //foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
-            //{
-            //    viewModel.display += $"[CalculateParameter ID = {ID}]\r\n";
-            //    dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
-            //    dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
+            IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
+            viewModel.display = "";
+            var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                if (ID != "0050") dataAnalyzer.set0050BasicData(basicData0050);
 
-            //    dataAnalyzer.calculateParameter();
-            //    viewModel.display += dataAnalyzer.getDisplay();
+                viewModel.display += $"[GetFulturePrice ID = {ID}]\r\n";
+                dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
+                dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
+                dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
 
-            //    Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
-            //    viewModel.display += "\r\n";
-            //}
+                dataAnalyzer.calculateFuturePriceData();
+                viewModel.display += dataAnalyzer.getDisplay();
+
+                Core.futurePriceDataManager.saveFuturePriceData(ID, dataAnalyzer.getFuturePriceData());
+                viewModel.display += "\r\n";
+            
+            }
+        }
+
+        private void GetParameterFuturePriceTable(object sender, RoutedEventArgs e)
+        {
+            //TODO
+            IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
+            viewModel.display = "";
+            var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                if (ID != "0050") dataAnalyzer.set0050BasicData(basicData0050);
+
+                viewModel.display += $"[GetFulturePrice ID = {ID}]\r\n";
+                dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
+                dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
+                dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
+
+                dataAnalyzer.calculateFuturePriceData();
+                viewModel.display += dataAnalyzer.getDisplay();
+
+                Core.futurePriceDataManager.saveFuturePriceData(ID, dataAnalyzer.getFuturePriceData());
+                viewModel.display += "\r\n";
+
+            }
         }
     }
 }
