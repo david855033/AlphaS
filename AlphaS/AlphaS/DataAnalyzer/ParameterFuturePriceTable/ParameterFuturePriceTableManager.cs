@@ -77,5 +77,11 @@ namespace AlphaS.DataAnalyzer
                 sw.WriteLine(sb.ToString());
             }
         }
+
+        public void resetParameterFuturePriceTable(string parameterName)
+        {
+            string filepath = _baseFolder + $@"\{parameterName}_ParameterFuturePriceTable.txt";
+            if (File.Exists(filepath)) File.Delete(filepath);
+        }
     }
 }

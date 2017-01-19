@@ -248,6 +248,7 @@ namespace AlphaS.DataAnalyzer
         }
 
 
+
         private List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData;
         public void setParameterFuturePriceTableData(List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData)
         {
@@ -257,7 +258,6 @@ namespace AlphaS.DataAnalyzer
         {
             return parameterFuturePriceTableData;
         }
-        //TODO
         public void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend)
         {
             display = "";
@@ -267,24 +267,120 @@ namespace AlphaS.DataAnalyzer
 
             foreach (var parameterNameAndIndex in parameterIndex)
             {
+                allDataToAppend.Add(parameterNameAndIndex.Key, new List<ParameterFuturePriceTableInformation>());
                 foreach (var date in dateList)
                 {
                     var matchedFuturePriceData = futurePriceData.Find(x => x.date == date);
+                    if (matchedFuturePriceData.futurePriceRank.Contains(null)||
+                        matchedFuturePriceData.futurePrices.Contains(null)
+                        ) break;
+
                     var matchedAnalyzedData = analyzedData.Find(x => x.date == date);
-                    var newParameterFuturePriceMatch = new ParameterFuturePriceTableInformation();
-                    newParameterFuturePriceMatch.parameterValue = matchedAnalyzedData.parameters[parameterNameAndIndex.Value].GetValueOrDefault();
+                    var newParameterFuturePriceToAdd = new ParameterFuturePriceTableInformation();
+                    newParameterFuturePriceToAdd.parameterValue = matchedAnalyzedData.parameters[parameterNameAndIndex.Value].GetValueOrDefault();
+
                     for (int i = 0; i < matchedFuturePriceData.futurePrices.Length; i++)
                     {
                         var currentFuturePrice = matchedFuturePriceData.futurePrices[i].GetValueOrDefault();
                         var currentFuturePriceLog = Math.Log(((currentFuturePrice / 100) + 1).getDoubleFromDecimal());
+                        newParameterFuturePriceToAdd.futurePriceLogs[i] = currentFuturePriceLog.round(4).getDecimalFromDouble();
                     }
+
+                    newParameterFuturePriceToAdd.futurePriceRanks = matchedFuturePriceData.futurePriceRank;
+
+                    allDataToAppend[parameterNameAndIndex.Key].Add(newParameterFuturePriceToAdd);
                 }
             }
+        }
+
+
+        int PARAMETER_GROUP_COUNT = 15;
+        private List<ParameterFuturePriceTableInformation> finalParameterFuturePriceTableData;
+        public List<ParameterFuturePriceTableInformation> getFinalParameterFuturePriceTableData()
+        {
+            return finalParameterFuturePriceTableData;
         }
         public void calculateParameterFuturePriceTable()
         {
             display = "";
+            var allParameterValues = new List<decimal>();
+            foreach (var currentData in parameterFuturePriceTableData)
+            {
+                var index = allParameterValues.BinarySearch(currentData.parameterValue);
+                if (index < 0) index = ~index;
+                allParameterValues.Insert(index, currentData.parameterValue);
+            }
 
+            var futurePriceLogsGroupByParameter = new List<decimal?[]>[PARAMETER_GROUP_COUNT];
+            for (int i = 0; i < PARAMETER_GROUP_COUNT; i++)
+            { futurePriceLogsGroupByParameter[i] = new List<decimal?[]>(); }
+
+            var futurePriceRanksGroupByParameter = new List<decimal?[]>[PARAMETER_GROUP_COUNT];
+            for (int i = 0; i < PARAMETER_GROUP_COUNT; i++)
+            { futurePriceRanksGroupByParameter[i] = new List<decimal?[]>(); }
+
+            decimal[] cutoffs = new decimal[PARAMETER_GROUP_COUNT - 1];
+            for (int i = 0; i < cutoffs.Length; i++)
+            {
+                int indexOfCutoff = allParameterValues.Count * (i + 1) / PARAMETER_GROUP_COUNT;
+                cutoffs[i] = allParameterValues[indexOfCutoff];
+                if (i > 0 && cutoffs[i] == cutoffs[i - 1]) cutoffs[i] += 0.01M;
+            }
+
+            foreach (var data in parameterFuturePriceTableData)
+            {
+                int i = 0;
+                for (; i < cutoffs.Length; i++)
+                    if (data.parameterValue < cutoffs[i])
+                        break;
+                futurePriceLogsGroupByParameter[i].Add(data.futurePriceLogs);
+                futurePriceRanksGroupByParameter[i].Add(data.futurePriceRanks);
+            }
+
+            decimal[,] finalFuturePriceLogsTable = new decimal[futurePriceLogsGroupByParameter.Length, FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length];
+
+            decimal[,] finalFuturePriceRanksTable = new decimal[futurePriceLogsGroupByParameter.Length, FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length];
+
+            for (int i = 0; i < futurePriceLogsGroupByParameter.Length; i++)
+            {
+                for (int j = 0; j < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; j++)
+                {
+                    {
+                        var queryPriceLogs = from q in futurePriceLogsGroupByParameter[i]
+                                             orderby q[j]
+                                             select q[j];
+                        finalFuturePriceLogsTable[i, j] = queryPriceLogs.ToArray()[queryPriceLogs.Count() / 2].Value;
+                    }
+                    {
+                        var queryPriceRanks = from q in futurePriceRanksGroupByParameter[i]
+                                              orderby q[j]
+                                              select q[j];
+                        finalFuturePriceRanksTable[i, j] = queryPriceRanks.ToArray()[queryPriceRanks.Count() / 2].Value;
+                    }
+                }
+            }
+
+            finalParameterFuturePriceTableData = new List<ParameterFuturePriceTableInformation>();
+            for (int i = 0; i < PARAMETER_GROUP_COUNT; i++)
+            {
+                var newData = new ParameterFuturePriceTableInformation();
+                if (i == cutoffs.Length)
+                {
+                    newData.parameterValue = 0;
+                }
+                else
+                {
+                    newData.parameterValue = cutoffs[i];
+                }
+
+                newData.futurePriceLogs = new decimal?[FuturePriceDataInformation.FUTURE_PRICE_DAYS.Count()];
+                for (int j = 0; j < newData.futurePriceLogs.Length; j++)
+                {
+                    newData.futurePriceLogs[j] = finalFuturePriceLogsTable[i, j];
+                    newData.futurePriceRanks[j] = finalFuturePriceRanksTable[i, j];
+                }
+                finalParameterFuturePriceTableData.Add(newData);
+            }
         }
 
     }

@@ -14,10 +14,18 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <TextBlock FontSize="15" Margin="0,20">Function</TextBlock>
+            <Label>Stock Extended Data Function</Label>
             <Button Click="UpdateDiv">UpdateDiv</Button>
             <Button Click="CalculateParameter">Parameter</Button>
+            <Label>Score Calculation Function</Label>
+            <Button Click="GetStockScore">GetStockScore</Button>
+            <Label>Future Price Function</Label>
             <Button Click="GetFulturePrice">GetFuturePrice</Button>
+            <Button Click="GetFulturePriceRank">GetFuturePriceRank</Button>
+            <Label>Parameter Analyasis Function</Label>
             <Button Click="AppendParameterFuturePriceTable">AppendParameterFuturePriceTable</Button>
+            <Button Click="CalculateParameterFuturePriceTable">CalculateParameterFuturePriceTable</Button>
+            
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding display}" Padding="20,0,0,0"/>
     </Grid>

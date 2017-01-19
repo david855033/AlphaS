@@ -10,10 +10,11 @@ namespace AlphaS.DataAnalyzer
 {
     public class ParameterFuturePriceTableInformation : IComparable
     {
-        public static int[] FUTURE_PRICE_DAYS = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80 };
+        public static int[] FUTURE_PRICE_DAYS = new int[] { 10, 20, 30, 40, 50, 60, 70, 80 };
 
         public decimal parameterValue;
-        public decimal?[] futurePricesLogs = new decimal?[FUTURE_PRICE_DAYS.Length];
+        public decimal?[] futurePriceLogs = new decimal?[FUTURE_PRICE_DAYS.Length];
+        public decimal?[] futurePriceRanks = new decimal?[FUTURE_PRICE_DAYS.Length];
 
         public int CompareTo(object obj)
         {
@@ -31,13 +32,29 @@ namespace AlphaS.DataAnalyzer
             parameterValue = splitline[i++].getDecimalFromString();
             if (splitline.Length > i)
             {
-                for (int x = i; x < splitline.Length; x++)
+                int x = i;
+                while (x < splitline.Length && x - i < futurePriceLogs.Length)
                 {
                     if (splitline[x] != "NA")
                     {
-                        futurePricesLogs[x - i] = splitline[x].getDecimalFromString();
+                        futurePriceLogs[x - i] = splitline[x].getDecimalFromString();
                     }
+                    x++;
                 }
+                i = x;
+            }
+            if (splitline.Length > i)
+            {
+                int x = i;
+                while (x < splitline.Length && x - i < futurePriceRanks.Length)
+                {
+                    if (splitline[x] != "NA")
+                    {
+                        futurePriceRanks[x - i] = splitline[x].getDecimalFromString();
+                    }
+                    x++;
+                }
+                i = x;
             }
         }
 
@@ -50,11 +67,22 @@ namespace AlphaS.DataAnalyzer
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(parameterValue.ToString());
-            for (int i = 0; i < futurePricesLogs.Length; i++)
+            for (int i = 0; i < futurePriceLogs.Length; i++)
             {
-                if (futurePricesLogs[i] != null)
+                if (futurePriceLogs[i] != null)
                 {
-                    sb.Append("\t" + futurePricesLogs[i].round(4).ToString());
+                    sb.Append("\t" + futurePriceLogs[i].round(4).ToString());
+                }
+                else
+                {
+                    sb.Append("\tNA");
+                }
+            }
+            for (int i = 0; i < futurePriceRanks.Length; i++)
+            {
+                if (futurePriceRanks[i] != null)
+                {
+                    sb.Append("\t" + futurePriceRanks[i].round(4).ToString());
                 }
                 else
                 {

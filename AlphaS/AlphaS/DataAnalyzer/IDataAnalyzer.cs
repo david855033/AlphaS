@@ -23,6 +23,7 @@ namespace AlphaS.DataAnalyzer
 
         void setParameterFuturePriceTableData(List<ParameterFuturePriceTableInformation> FuturePriceData);
         List<ParameterFuturePriceTableInformation> getParameterFuturePriceTableData();
+        List<ParameterFuturePriceTableInformation> getFinalParameterFuturePriceTableData();
 
         string getDisplay();
        

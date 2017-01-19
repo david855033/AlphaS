@@ -12,6 +12,7 @@ namespace AlphaS.DataAnalyzer
         string getBaseFolder();
 
         List<ParameterFuturePriceTableInformation> getParameterFuturePriceTable(string parameterName);
+        void resetParameterFuturePriceTable(string parameterName);
         void saveParameterFuturePriceTable(string parameterName, List<ParameterFuturePriceTableInformation> FuturePriceDataToWrite);
         void appendParameterFuturePrice(string parameterName, ParameterFuturePriceTableInformation dataToAppend);
         void appendParameterFuturePrice(string parameterName, List<ParameterFuturePriceTableInformation> dataToAppend);

@@ -10,10 +10,12 @@ namespace AlphaS.DataAnalyzer
 {
     public class FuturePriceDataInformation : IComparable
     {
-        public static int[] FUTURE_PRICE_DAYS = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80 };
+        public static int[] FUTURE_PRICE_DAYS = new int[] { 10, 20, 30, 40, 50, 60, 70, 80 };
+        // ParameterFuturePriceTableInformation內要一樣
 
         public DateTime date;
         public decimal?[] futurePrices = new decimal?[FUTURE_PRICE_DAYS.Length];
+        public decimal?[] futurePriceRank = new decimal?[FUTURE_PRICE_DAYS.Length];
 
         public int CompareTo(object obj)
         {
@@ -29,12 +31,28 @@ namespace AlphaS.DataAnalyzer
             date = splitline[i++].getDateTimeFromString();
             if (splitline.Length > i)
             {
-                for (int x = i; x < splitline.Length; x++)
+                int x = i;
+                while (x < splitline.Length && x - i < FUTURE_PRICE_DAYS.Length)
                 {
                     if (splitline[x] != "NA")
                     {
                         futurePrices[x - i] = splitline[x].getDecimalFromString();
                     }
+                    x++;
+                }
+                i = x;
+            }
+
+            if (splitline.Length > i)
+            {
+                int x = i;
+                while (x < splitline.Length && x - i < FUTURE_PRICE_DAYS.Length)
+                {
+                    if (splitline[x] != "NA")
+                    {
+                        futurePriceRank[x - i] = splitline[x].getDecimalFromString();
+                    }
+                    x++;
                 }
             }
         }
@@ -53,6 +71,17 @@ namespace AlphaS.DataAnalyzer
                 if (futurePrices[i] != null)
                 {
                     sb.Append("\t" + futurePrices[i].round(2).ToString());
+                }
+                else
+                {
+                    sb.Append("\tNA");
+                }
+            }
+            for (int i = 0; i < futurePriceRank.Length; i++)
+            {
+                if (futurePriceRank[i] != null)
+                {
+                    sb.Append("\t" + futurePriceRank[i].round(2).ToString());
                 }
                 else
                 {

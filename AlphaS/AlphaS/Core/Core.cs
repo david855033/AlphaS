@@ -32,6 +32,9 @@ namespace AlphaS.CoreNS
         static readonly string PARAMETER_FUTURE_PRICE_TABLE_FOLDER = DEFAULT_FOLDER + "\\" + "ParameterFuturePriceTable";
         public static readonly IParameterFuturePriceTableManager parameterFuturePriceTableManager = new ParameterFuturePriceTableManager(PARAMETER_FUTURE_PRICE_TABLE_FOLDER);
 
+        static readonly string FINAL_PARAMETER_FUTURE_PRICE_TABLE_FOLDER = DEFAULT_FOLDER + "\\" + "FinalParameterFuturePriceTable";
+        public static readonly IParameterFuturePriceTableManager finalParameterFuturePriceTableManager = new ParameterFuturePriceTableManager(FINAL_PARAMETER_FUTURE_PRICE_TABLE_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()
