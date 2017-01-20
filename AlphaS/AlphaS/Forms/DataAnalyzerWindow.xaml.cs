@@ -152,7 +152,7 @@ namespace AlphaS.Forms
                 foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
                 {
                     var findIndexStock = futurePriceStockDataInADay.FindIndex(x => x.stockID == ID);
-                    if (findIndexStock>=0 && futurePriceStockDataInADay[findIndexStock].futurePriceRank.Contains(null))
+                    if (findIndexStock >= 0 && futurePriceStockDataInADay[findIndexStock].futurePriceRank.Contains(null))
                         break;
                     var futurePriceData = Core.futurePriceDataManager.getFuturePriceData(ID);
                     var findIndexDate = futurePriceData.FindIndex(x => x.date == dateToCalculate);
@@ -216,10 +216,23 @@ namespace AlphaS.Forms
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
+            dataAnalyzer.resetParameterFuturePriceDictionary();
+            foreach (string parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+            {
+                dataAnalyzer.appendParameterFuturePriceDictionary(parameterName, Core.finalParameterFuturePriceTableManager.getParameterFuturePriceTable(parameterName));
+            }
+
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
                 dataAnalyzer.setScoreData(Core.scoreDataManager.getScoreData(ID));
+
+                dataAnalyzer.calculateScoreData();
+
+                Core.scoreDataManager.saveScoreData(ID, dataAnalyzer.getScoreData());
+
+                viewModel.display += dataAnalyzer.getDisplay();
+                viewModel.display += "\r\n";
             }
         }
     }

@@ -87,6 +87,7 @@
     <Compile Include="DataAnalyzer\ParameterCalculators\Calculator.cs" />
     <Compile Include="DataAnalyzer\ScoreData\IScoreDataManager.cs" />
     <Compile Include="DataAnalyzer\ScoreData\ScoreDataInformation.cs" />
+    <Compile Include="DataAnalyzer\ScoreData\ScoreDataManager.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
     </Compile>

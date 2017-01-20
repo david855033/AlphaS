@@ -16,7 +16,7 @@ namespace AlphaS.DataAnalyzer
         List<BasicDailyDataInformation> getBasicDailyData();
 
         void setAnalyzedData(List<AnalyzedDataInformation> AnalyzedData);
-        List<AnalyzedDataInformation>  getAnalyzedData();
+        List<AnalyzedDataInformation> getAnalyzedData();
 
         void setFuturePriceData(List<FuturePriceDataInformation> FuturePriceData);
         List<FuturePriceDataInformation> getFuturePriceData();
@@ -25,12 +25,20 @@ namespace AlphaS.DataAnalyzer
         List<ParameterFuturePriceTableInformation> getParameterFuturePriceTableData();
         List<ParameterFuturePriceTableInformation> getFinalParameterFuturePriceTableData();
 
+        void resetParameterFuturePriceDictionary();
+        Dictionary<string, List<ParameterFuturePriceTableInformation>> getParameterFuturePriceDictionary();
+        void appendParameterFuturePriceDictionary(string parameterName, List<ParameterFuturePriceTableInformation> ParameterFuturePriceList);
+
+        void setScoreData(List<ScoreDataInformation> scoreData);
+        List<ScoreDataInformation> getScoreData();
+
         string getDisplay();
-       
+
         void standarizeAnalyzeData();
         void calculateParameter();
         void calculateFuturePriceData();
         void calculateParameterFuturePriceTable();
         void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend);
+        void calculateScoreData();
     }
 }

@@ -247,8 +247,6 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
-
-
         private List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData;
         public void setParameterFuturePriceTableData(List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData)
         {
@@ -293,6 +291,33 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
+        private Dictionary<string,List<ParameterFuturePriceTableInformation>> parameterFuturePriceDictionary;
+        public void resetParameterFuturePriceDictionary()
+        {
+            parameterFuturePriceDictionary = new Dictionary<string, List<ParameterFuturePriceTableInformation>>();
+        }
+        public void appendParameterFuturePriceDictionary(string parameterName, List<ParameterFuturePriceTableInformation> ParameterFuturePriceList)
+        {
+            parameterFuturePriceDictionary.Add(parameterName, ParameterFuturePriceList);
+        }
+        public Dictionary<string, List<ParameterFuturePriceTableInformation>> getParameterFuturePriceDictionary()
+        {
+            return parameterFuturePriceDictionary;
+        }
+        
+        private List<ScoreDataInformation> scoreData;
+        public List<ScoreDataInformation> getScoreData()
+        {
+            return scoreData;
+        }
+        public void setScoreData(List<ScoreDataInformation> scoreData)
+        {
+            this.scoreData = scoreData;
+        }
+        public void calculateScoreData()
+        {
+            throw new NotImplementedException();
+        }
 
         int PARAMETER_GROUP_COUNT = 15;
         private List<ParameterFuturePriceTableInformation> finalParameterFuturePriceTableData;
@@ -383,5 +408,6 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
+       
     }
 }

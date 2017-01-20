@@ -35,6 +35,9 @@ namespace AlphaS.CoreNS
         static readonly string FINAL_PARAMETER_FUTURE_PRICE_TABLE_FOLDER = DEFAULT_FOLDER + "\\" + "FinalParameterFuturePriceTable";
         public static readonly IParameterFuturePriceTableManager finalParameterFuturePriceTableManager = new ParameterFuturePriceTableManager(FINAL_PARAMETER_FUTURE_PRICE_TABLE_FOLDER);
 
+        static readonly string SCORE_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "ScoreData";
+        public static readonly IScoreDataManager scoreDataManager = new ScoreDataManager(SCORE_DATA_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()
