@@ -316,8 +316,46 @@ namespace AlphaS.DataAnalyzer
         }
         public void calculateScoreData()
         {
-            throw new NotImplementedException();
+            display = "";
+            foreach (var currentAnalyzedData in analyzedData)
+            {
+                bool hasInvalidData = currentAnalyzedData.parameters.Contains(null);
+                if (hasInvalidData) continue;
+                
+                var currentData = currentAnalyzedData.date;
+                int totalParameterCount = AnalyzedDataInformation.parameterIndex.Count();
+
+                foreach (var parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+                {
+                    var lookUpTable = parameterFuturePriceDictionary[parameterName];
+                    var index = AnalyzedDataInformation.parameterIndex[parameterName];
+                    var parameterValue = currentAnalyzedData.parameters[index].GetValueOrDefault() ;
+                    decimal?[] logArray = lookUpLogFromParameter(parameterValue, lookUpTable);
+                    decimal?[] rankArray = lookUpRankFromParameter(parameterValue, lookUpTable);
+                }
+            }
         }
+        private decimal?[] lookUpLogFromParameter(decimal parameterValue,List<ParameterFuturePriceTableInformation> lookUpTable)
+        {
+            int i = 0;
+            while (parameterValue > lookUpTable[i].parameterValue)
+            {
+                i++;
+            }
+            if (i == lookUpTable.Count) i--;
+            return lookUpTable[i].futurePriceLogs;
+        }
+        private decimal?[] lookUpRankFromParameter(decimal parameterValue, List<ParameterFuturePriceTableInformation> lookUpTable)
+        {
+            int i = 0;
+            while (parameterValue > lookUpTable[i].parameterValue)
+            {
+                i++;
+            }
+            if (i == lookUpTable.Count) i--;
+            return lookUpTable[i].futurePriceRanks;
+        }
+
 
         int PARAMETER_GROUP_COUNT = 15;
         private List<ParameterFuturePriceTableInformation> finalParameterFuturePriceTableData;
