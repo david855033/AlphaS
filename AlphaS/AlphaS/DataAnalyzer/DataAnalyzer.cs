@@ -269,7 +269,7 @@ namespace AlphaS.DataAnalyzer
                 foreach (var date in dateList)
                 {
                     var matchedFuturePriceData = futurePriceData.Find(x => x.date == date);
-                    if (matchedFuturePriceData.futurePriceRank.Contains(null)||
+                    if (matchedFuturePriceData.futurePriceRank.Contains(null) ||
                         matchedFuturePriceData.futurePrices.Contains(null)
                         ) break;
 
@@ -291,7 +291,7 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
-        private Dictionary<string,List<ParameterFuturePriceTableInformation>> parameterFuturePriceDictionary;
+        private Dictionary<string, List<ParameterFuturePriceTableInformation>> parameterFuturePriceDictionary;
         public void resetParameterFuturePriceDictionary()
         {
             parameterFuturePriceDictionary = new Dictionary<string, List<ParameterFuturePriceTableInformation>>();
@@ -304,7 +304,7 @@ namespace AlphaS.DataAnalyzer
         {
             return parameterFuturePriceDictionary;
         }
-        
+
         private List<ScoreDataInformation> scoreData;
         public List<ScoreDataInformation> getScoreData()
         {
@@ -317,32 +317,55 @@ namespace AlphaS.DataAnalyzer
         public void calculateScoreData()
         {
             display = "";
+            DateTime latestDate = DateTime.MinValue;
+            if (scoreData.Count > 0) latestDate = scoreData.Last().date;
+            var analyzedDataToCalculate = from q in analyzedData
+                                          where q.date > latestDate
+                                          select q;
+            display += $"latest date = {latestDate}, to calculate = {analyzedDataToCalculate.Count()}\r\n";
             foreach (var currentAnalyzedData in analyzedData)
             {
                 bool hasInvalidData = currentAnalyzedData.parameters.Contains(null);
                 if (hasInvalidData) continue;
-                
+
                 var currentData = currentAnalyzedData.date;
                 int totalParameterCount = AnalyzedDataInformation.parameterIndex.Count();
 
+                var newScoreData = new ScoreDataInformation();
+                newScoreData.date = currentData;
+
+                decimal[] valueScore = new decimal[ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length];
+                decimal[] rankScore = new decimal[ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length];
                 foreach (var parameterName in AnalyzedDataInformation.parameterIndex.Keys)
                 {
                     var lookUpTable = parameterFuturePriceDictionary[parameterName];
                     var index = AnalyzedDataInformation.parameterIndex[parameterName];
-                    var parameterValue = currentAnalyzedData.parameters[index].GetValueOrDefault() ;
+                    var parameterValue = currentAnalyzedData.parameters[index].GetValueOrDefault();
                     decimal?[] logArray = lookUpLogFromParameter(parameterValue, lookUpTable);
                     decimal?[] rankArray = lookUpRankFromParameter(parameterValue, lookUpTable);
+                    valueScore = valueScore.addUpDecimalArray(getScoreFromArray(logArray));
+                    rankScore = rankScore.addUpDecimalArray(getScoreFromArray(rankArray));
                 }
+
+                newScoreData.valueScore = valueScore.divideElementBy(AnalyzedDataInformation.parameterIndex.Keys.Count).exp().round(2);
+                newScoreData.rankScore = rankScore.divideElementBy(AnalyzedDataInformation.parameterIndex.Keys.Count).round(2);
+
+                scoreData.Add(newScoreData);
             }
         }
-        private decimal?[] lookUpLogFromParameter(decimal parameterValue,List<ParameterFuturePriceTableInformation> lookUpTable)
+        private decimal?[] lookUpLogFromParameter(decimal parameterValue, List<ParameterFuturePriceTableInformation> lookUpTable)
         {
             int i = 0;
             while (parameterValue > lookUpTable[i].parameterValue)
             {
                 i++;
+                if (i == lookUpTable.Count)
+                {
+                    i--;
+                    break;
+                }
             }
-            if (i == lookUpTable.Count) i--;
+
             return lookUpTable[i].futurePriceLogs;
         }
         private decimal?[] lookUpRankFromParameter(decimal parameterValue, List<ParameterFuturePriceTableInformation> lookUpTable)
@@ -351,11 +374,44 @@ namespace AlphaS.DataAnalyzer
             while (parameterValue > lookUpTable[i].parameterValue)
             {
                 i++;
+                if (i == lookUpTable.Count)
+                {
+                    i--;
+                    break;
+                }
             }
-            if (i == lookUpTable.Count) i--;
             return lookUpTable[i].futurePriceRanks;
         }
+        private decimal[] getScoreFromArray(decimal?[] array)
+        {
+            int j = 0;
+            decimal[] result = new decimal[ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length];
+            for (int i = 0; i < ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length; i++)
+            {
+                var correspondingIndex = new List<int>();
+                int cutoff = ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION[i];
 
+                for (; j < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; j++)
+                {
+                    if (FuturePriceDataInformation.FUTURE_PRICE_DAYS[j]
+                        <= ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION[i])
+                    {
+                        correspondingIndex.Add(j);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                decimal sum = 0;
+                foreach (var index in correspondingIndex)
+                {
+                    sum += array[index].GetValueOrDefault();
+                }
+                result[i] = sum / correspondingIndex.Count;
+            }
+            return result;
+        }
 
         int PARAMETER_GROUP_COUNT = 15;
         private List<ParameterFuturePriceTableInformation> finalParameterFuturePriceTableData;
@@ -446,6 +502,6 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
-       
+
     }
 }

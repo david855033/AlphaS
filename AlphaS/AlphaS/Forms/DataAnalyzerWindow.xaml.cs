@@ -235,5 +235,23 @@ namespace AlphaS.Forms
                 viewModel.display += "\r\n";
             }
         }
+
+        private void ScoreFuturePriceEvaluationTable(object sender, RoutedEventArgs e)
+        {
+            IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
+            viewModel.display = "Score vs Future Price \r\n";
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                viewModel.display += $"record ID {ID}\r\n";
+                dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
+                dataAnalyzer.setScoreData(Core.scoreDataManager.getScoreData(ID));
+
+                dataAnalyzer.MakeScoreFuturePriceEvaluationTable();
+
+                
+
+                viewModel.display += dataAnalyzer.getDisplay();
+                viewModel.display += "\r\n";
+            }
     }
 }

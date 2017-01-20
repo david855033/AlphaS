@@ -25,7 +25,8 @@
             <Label>Parameter Analyasis Function</Label>
             <Button Click="AppendParameterFuturePriceTable">AppendParameterFuturePriceTable</Button>
             <Button Click="CalculateParameterFuturePriceTable">CalculateParameterFuturePriceTable</Button>
-            
+            <Label>Evaluation Functions</Label>
+            <Button Click="ScoreFuturePriceEvaluationTable">ScoreFuturePriceEvaluationTable</Button>
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding display}" Padding="20,0,0,0"/>
     </Grid>

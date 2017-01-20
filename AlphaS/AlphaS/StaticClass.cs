@@ -127,5 +127,43 @@ namespace AlphaS
         {
             return input.Substring(0, input.LastIndexOf('\\'));
         }
+
+        public static decimal[] addUpDecimalArray(this decimal[] input, decimal[] toAdd)
+        {
+            int toCount = Math.Min(input.Length, toAdd.Length);
+            var result = new decimal[toCount];
+            for (int i = 0; i < toCount; i++)
+            {
+                result[i] = input[i] + toAdd[i];
+            }
+            return result;
+        }
+        public static decimal[] divideElementBy(this decimal[] input, int divider)
+        {
+            var result = new decimal[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                result[i] = input[i] / divider;
+            }
+            return result;
+        }
+        public static decimal[] round(this decimal[] input, int deci)
+        {
+            var result = new decimal[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                result[i] = input[i].round(deci);
+            }
+            return result;
+        }
+        public static decimal[] exp(this decimal[] input)
+        {
+            var result = new decimal[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                result[i] = ((Math.Exp(Convert.ToDouble(input[i])) - 1) * 100).getDecimalFromDouble();
+            }
+            return result;
+        }
     }
 }
