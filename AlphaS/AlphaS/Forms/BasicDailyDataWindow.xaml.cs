@@ -78,8 +78,12 @@ namespace AlphaS.Forms
 
             var missionList = missionListGenerator.getMissionList(viewModel.IsReadAll);
 
-            basicDailyDataDownloader.setMission(missionList);
-            basicDailyDataDownloader.startMission();
+            while (missionList.Count != 0)
+            {
+                basicDailyDataDownloader.setMission(missionList);
+                basicDailyDataDownloader.startMission();
+            }
+
         }
 
     }

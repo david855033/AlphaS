@@ -57,12 +57,15 @@ namespace AlphaS.BasicDailyData
             currentMission = null;
 
             DateTime missionAssignedTime = DateTime.Now;
-            while (missionList.Count > 0)
+            int lastCount = 0, tryCount=0;
+            while ( missionList.Count > 0)
             {
+                lastCount = missionList.Count;
                 Application.DoEvents();
                 if (currentMission == null)
                 {
                     assignMission();
+                    tryCount = 0;
                     printMissionList();
                 }
 
@@ -71,12 +74,17 @@ namespace AlphaS.BasicDailyData
                 {
                     missionAssignedTime = DateTime.Now;
                     querySend = true;
+                    if (++tryCount == 3)
+                    {
+                        assignMission(true);
+                        tryCount = 0;
+                    }
                     performMission();
                 }
             }
             printMissionList();
         }
-        void assignMission()
+        void assignMission(bool retrying = false)
         {
             if (missionList.Count > 0)
             {
@@ -84,7 +92,7 @@ namespace AlphaS.BasicDailyData
                 {
                     currentMission = missionList.First();
                 }
-                if (currentMission.type != currentWebSiteStockType)
+                if ((currentMission.type != currentWebSiteStockType) || retrying)
                 {
                     changeWebSite(webBrowser, currentMission.type);
                 }
@@ -216,7 +224,7 @@ namespace AlphaS.BasicDailyData
             List<BasicDailyDataInformation> analyzedDataList = analysisDataTable(resultTable.InnerHtml);
 
             FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
-            if (currentFileStatus != FileStatus.Null || nullcount++ > 2)
+            if (currentFileStatus != FileStatus.Null || ++nullcount > 2)
             {
                 nullcount = 0;
                 renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);

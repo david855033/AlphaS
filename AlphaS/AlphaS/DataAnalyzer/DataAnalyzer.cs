@@ -537,7 +537,7 @@ namespace AlphaS.DataAnalyzer
                 scoreFuturePriceToAdd.rankScore = scoreData.Find(x => x.date == d).rankScore;
                 scoreFuturePriceToAdd.futurePriceRank = futurePriceData.Find(x => x.date == d).futurePriceRank;
                 scoreFuturePriceToAdd.futurePrices = futurePriceData.Find(x => x.date == d).futurePrices;
-
+                    
                 scoreFuturePriceTable.Add(scoreFuturePriceToAdd);
             }
         }

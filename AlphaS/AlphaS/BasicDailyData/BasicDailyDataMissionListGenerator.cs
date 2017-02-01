@@ -36,7 +36,7 @@ namespace AlphaS.BasicDailyData
             {
                 int currentYear = startYear;
                 int currentMonth = startMonth;
-                while (currentYear < DateTime.Now.Year || 
+                while (currentYear < DateTime.Now.Year ||
                     (currentYear == DateTime.Now.Year && currentMonth <= DateTime.Now.Month))
                 {
                     var toAdd = new BasicDailyDataMission()
@@ -52,9 +52,24 @@ namespace AlphaS.BasicDailyData
                         var fileStatus = Core.basicDailyDataManager.getFileStatus(currentStock.ID);
                         int index = fileStatus.BinarySearch(new BasicDailyDataFileStatusInformation()
                         { year = currentYear.ToString(), month = currentMonth.ToString() });
-                        if ((index >= 0 &&
-                            (fileStatus[index].fileStatus == FileStatus.Temp || fileStatus[index].fileStatus == FileStatus.Null))
-                            || index < 0)
+                        if (index < 0
+                            ||
+                            index >= 0 &&
+                                (
+                                    (
+                                        fileStatus[index].fileStatus == FileStatus.Temp 
+                                        ||
+                                        (
+                                            fileStatus[index].fileStatus == FileStatus.Null 
+                                            &&
+                                            index >= fileStatus.Count() - 1
+                                        )
+                                    ) &&
+                                        fileStatus[index].modifiedTime.getDateTimeFromString()
+                                        .ToString("yyyyMMdd") !=
+                                        DateTime.Now.ToString("yyyyMMdd")
+                                )
+                            )
                         {
                             resultList.Add(toAdd);
                         }
