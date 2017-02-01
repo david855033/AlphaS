@@ -38,6 +38,9 @@ namespace AlphaS.CoreNS
         static readonly string SCORE_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "ScoreData";
         public static readonly IScoreDataManager scoreDataManager = new ScoreDataManager(SCORE_DATA_FOLDER);
 
+        static readonly string SCORE_FUTURE_PRICE_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "ScoreFuturePrice";
+        public static readonly IScoreFuturePriceTableManager scoreFuturePriceTableManager = new ScoreFuturePriceTableManager(SCORE_FUTURE_PRICE_DATA_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()

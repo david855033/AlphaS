@@ -323,7 +323,7 @@ namespace AlphaS.DataAnalyzer
                                           where q.date > latestDate
                                           select q;
             display += $"latest date = {latestDate}, to calculate = {analyzedDataToCalculate.Count()}\r\n";
-            foreach (var currentAnalyzedData in analyzedData)
+            foreach (var currentAnalyzedData in analyzedDataToCalculate)
             {
                 bool hasInvalidData = currentAnalyzedData.parameters.Contains(null);
                 if (hasInvalidData) continue;
@@ -502,6 +502,45 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
+
+        private List<ScoreFuturePriceDataInformation> scoreFuturePriceTable;
+        public List<ScoreFuturePriceDataInformation> getScoreFuturePriceTable()
+        {
+            return scoreFuturePriceTable;
+        }
+
+        public void MakeScoreFuturePriceEvaluationTable()
+        {
+            display = "";
+            scoreFuturePriceTable = new List<ScoreFuturePriceDataInformation>();
+            var availableScoreDates =
+                from q in scoreData
+                select q.date;
+            var availbleFutrePriceDates =
+                (from q in futurePriceData
+                 select q.date).ToList();
+            availbleFutrePriceDates.Sort();
+            List<DateTime> availableDate = new List<DateTime>();
+            foreach (var d in availableScoreDates)
+            {
+                if (availbleFutrePriceDates.BinarySearch(d) >= 0)
+                {
+                    availableDate.Add(d);
+                }
+            }
+
+            foreach (var d in availableDate)
+            {
+                var scoreFuturePriceToAdd = new ScoreFuturePriceDataInformation();
+
+                scoreFuturePriceToAdd.valueScore = scoreData.Find(x => x.date == d).valueScore;
+                scoreFuturePriceToAdd.rankScore = scoreData.Find(x => x.date == d).rankScore;
+                scoreFuturePriceToAdd.futurePriceRank = futurePriceData.Find(x => x.date == d).futurePriceRank;
+                scoreFuturePriceToAdd.futurePrices = futurePriceData.Find(x => x.date == d).futurePrices;
+
+                scoreFuturePriceTable.Add(scoreFuturePriceToAdd);
+            }
+        }
 
     }
 }

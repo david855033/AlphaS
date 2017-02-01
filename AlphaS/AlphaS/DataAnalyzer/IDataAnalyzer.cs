@@ -32,6 +32,8 @@ namespace AlphaS.DataAnalyzer
         void setScoreData(List<ScoreDataInformation> scoreData);
         List<ScoreDataInformation> getScoreData();
 
+        List<ScoreFuturePriceDataInformation> getScoreFuturePriceTable();
+
         string getDisplay();
 
         void standarizeAnalyzeData();
@@ -40,5 +42,6 @@ namespace AlphaS.DataAnalyzer
         void calculateParameterFuturePriceTable();
         void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend);
         void calculateScoreData();
+        void MakeScoreFuturePriceEvaluationTable();
     }
 }

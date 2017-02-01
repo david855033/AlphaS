@@ -85,6 +85,9 @@
     <Compile Include="DataAnalyzer\IDataAnalyzer.cs" />
     <Compile Include="DataAnalyzer\ParameterCalculators\BaseParameterCalculator.cs" />
     <Compile Include="DataAnalyzer\ParameterCalculators\Calculator.cs" />
+    <Compile Include="DataAnalyzer\IScoreFuturePriceTable\IScoreFuturePriceTableManager.cs" />
+    <Compile Include="DataAnalyzer\IScoreFuturePriceTable\ScoreFuturePriceDataInformation.cs" />
+    <Compile Include="DataAnalyzer\IScoreFuturePriceTable\ScoreFuturePriceTableManager.cs" />
     <Compile Include="DataAnalyzer\ScoreData\IScoreDataManager.cs" />
     <Compile Include="DataAnalyzer\ScoreData\ScoreDataInformation.cs" />
     <Compile Include="DataAnalyzer\ScoreData\ScoreDataManager.cs" />

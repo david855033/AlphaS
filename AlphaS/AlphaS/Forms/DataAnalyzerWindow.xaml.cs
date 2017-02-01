@@ -240,6 +240,8 @@ namespace AlphaS.Forms
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "Score vs Future Price \r\n";
+            Core.scoreFuturePriceTableManager.resetScoreFuturePriceTable();
+
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
                 viewModel.display += $"record ID {ID}\r\n";
@@ -248,10 +250,11 @@ namespace AlphaS.Forms
 
                 dataAnalyzer.MakeScoreFuturePriceEvaluationTable();
 
-                
+                Core.scoreFuturePriceTableManager.appendScoreFuturePriceTable(dataAnalyzer.getScoreFuturePriceTable());
 
                 viewModel.display += dataAnalyzer.getDisplay();
                 viewModel.display += "\r\n";
             }
+        }
     }
 }
