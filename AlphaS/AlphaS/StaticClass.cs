@@ -89,6 +89,11 @@ namespace AlphaS
             return result;
         }
 
+        public static string getRidOfPostStar(this string input)
+        {
+            return input.Replace("＊", "");
+        }
+
         public static DateTime getDateTimeFromString(this string input)
         {
             bool success = false;
@@ -126,6 +131,22 @@ namespace AlphaS
         public static string getFileFolderFromPath(this string input)
         {
             return input.Substring(0, input.LastIndexOf('\\'));
+        }
+
+        public static string getElaplsedTime(this double input)
+        {
+            if (input < 60)
+            {
+                return $"{input.round(0)}秒";
+            }
+            else if (input < 60 * 60)
+            {
+                return $"{(input - input % 60) / 60}分{(input % 60).round(0)}秒";
+            }
+            else
+            {
+                return $"{(input - input % 3600) / 3600}時{(input - input % 60) % 60}分{(input % 60).round(0)}秒";
+            }
         }
 
         public static decimal[] addUpDecimalArray(this decimal[] input, decimal[] toAdd)
