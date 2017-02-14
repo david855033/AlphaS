@@ -10,6 +10,7 @@ namespace AlphaS.DataAnalyzer
 {
     public class DataAnalyzer : IDataAnalyzer
     {
+        public static readonly decimal MIN_VOLUME_THRESHOLD = 25000; //unit: k NTD -> 2500w
         private string stockType;
         public void setStockType(string type)
         {
@@ -83,6 +84,8 @@ namespace AlphaS.DataAnalyzer
                 if (i == 0)
                 {
                     newAnalyzedData.divideWeight = startWeight;
+                    newAnalyzedData.recentMinVolume = newAnalyzedData.volume;
+                    newAnalyzedData.recentMinVolumeDate = newAnalyzedData.date;
                 }
                 else
                 {
@@ -93,6 +96,33 @@ namespace AlphaS.DataAnalyzer
                         newAnalyzedData.low = analyzedData.Last().low;
                         newAnalyzedData.high = analyzedData.Last().high;
                         newAnalyzedData.change = 0;
+                    }
+
+
+                    newAnalyzedData.recentMinVolume = analyzedData.Last().recentMinVolume;
+                    newAnalyzedData.recentMinVolumeDate = analyzedData.Last().recentMinVolumeDate;
+                    if (newAnalyzedData.volume < newAnalyzedData.recentMinVolume)
+                    {
+                        newAnalyzedData.recentMinVolume = newAnalyzedData.volume;
+                        newAnalyzedData.recentMinVolumeDate = newAnalyzedData.date;
+                    }
+                    else if
+                      (i - basicDailyData.FindIndex(x => x.date == newAnalyzedData.recentMinVolumeDate) >= AnalyzedDataInformation.RECENT_MIN_VOL_DAY)
+                    {
+                        int startIndex = Math.Max(0, i - AnalyzedDataInformation.RECENT_MIN_VOL_DAY);
+                        for (int j = startIndex; j < i; j++)
+                        {
+                            if (j == startIndex)
+                            {
+                                newAnalyzedData.recentMinVolume = analyzedData[j].volume;
+                                newAnalyzedData.recentMinVolumeDate = analyzedData[j].date;
+                            }
+                            if (analyzedData[j].volume < newAnalyzedData.recentMinVolume)
+                            {
+                                newAnalyzedData.recentMinVolume = analyzedData[j].volume;
+                                newAnalyzedData.recentMinVolumeDate = analyzedData[j].date;
+                            }
+                        }
                     }
 
                     decimal expectChange = newAnalyzedData.close - analyzedData.Last().close;
@@ -231,9 +261,14 @@ namespace AlphaS.DataAnalyzer
                 addDisplay($"- Calculate from index={startCalculationIndex} to {endCalculationIndex}");
             }
 
-
+            int belowMinVolumeCount = 0;
             for (int i = startCalculationIndex; i <= endCalculationIndex; i++)
             {
+                if (analyzedData[i].recentMinVolume < MIN_VOLUME_THRESHOLD)
+                {
+                    belowMinVolumeCount++;
+                    continue;
+                }//todo
                 var newFuturePriceData = new FuturePriceDataInformation(analyzedData[i]);
 
                 for (int n = 0; n < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; n++)
@@ -245,6 +280,7 @@ namespace AlphaS.DataAnalyzer
 
                 futurePriceData.Add(newFuturePriceData);
             }
+            addDisplay($"- below Min Volume Threshold: {belowMinVolumeCount}");
         }
 
         private List<ParameterFuturePriceTableInformation> parameterFuturePriceTableData;
@@ -537,7 +573,7 @@ namespace AlphaS.DataAnalyzer
                 scoreFuturePriceToAdd.rankScore = scoreData.Find(x => x.date == d).rankScore;
                 scoreFuturePriceToAdd.futurePriceRank = futurePriceData.Find(x => x.date == d).futurePriceRank;
                 scoreFuturePriceToAdd.futurePrices = futurePriceData.Find(x => x.date == d).futurePrices;
-                    
+
                 scoreFuturePriceTable.Add(scoreFuturePriceToAdd);
             }
         }

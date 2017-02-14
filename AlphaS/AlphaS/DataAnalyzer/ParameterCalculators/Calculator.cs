@@ -227,7 +227,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                     AnalyzedData[i].parameters[parameterIndexVMA] = VMA;
 
                     AnalyzedData[i].parameters[parameterIndexVBA] =
-                        ((AnalyzedData[i].volume - VMA) / VMA * 100).round(2);
+                        VMA == 0 ? 0 : ((AnalyzedData[i].volume - VMA) / VMA * 100).round(2);
                 }
             }
 
@@ -244,6 +244,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                         int parameterIndexVMA2 = AnalyzedDataInformation.parameterIndex[$"VMA{day2}"];
 
                         AnalyzedData[i].parameters[parameterIndexVBA] =
+                            AnalyzedData[i].parameters[parameterIndexVMA2] == 0 ? 0 :
                             (AnalyzedData[i].parameters[parameterIndexVMA1] /
                             AnalyzedData[i].parameters[parameterIndexVMA2] * 100 - 100).round(2);
                     }
@@ -359,6 +360,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                     AnalyzedData[i].parameters[parameterIndexMA] = MeanVolumePerOrder;
 
                     AnalyzedData[i].parameters[parameterIndexBA] =
+                        MeanVolumePerOrder == 0 ? 0 :
                         ((AnalyzedData[i].volumePerOrder - MeanVolumePerOrder) / MeanVolumePerOrder * 100).round(2);
                 }
             }
@@ -375,6 +377,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                         int parameterIndexMA2 = AnalyzedDataInformation.parameterIndex[$"MeanVolumePerOrder{day2}"];
 
                         AnalyzedData[i].parameters[parameterIndexBA] =
+                            AnalyzedData[i].parameters[parameterIndexMA2] == 0 ? 0 :
                             (AnalyzedData[i].parameters[parameterIndexMA1] /
                             AnalyzedData[i].parameters[parameterIndexMA2] * 100 - 100).round(2);
                     }
@@ -457,7 +460,8 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 s += dayToCount + "/";
 
                 decimal incresingSum = 0, decreasingSum = 0;
-                for (int i = startCalculationIndex - dayToCount; i < startCalculationIndex; i++)
+                for (int i = startCalculationIndex - dayToCount; 
+                    i < startCalculationIndex && i < existAnalyzeDataCount; i++)
                 {
                     decimal N_change = AnalyzedData[i].N_close - AnalyzedData[i - 1].N_close;
                     if (N_change > 0) { incresingSum += N_change; }

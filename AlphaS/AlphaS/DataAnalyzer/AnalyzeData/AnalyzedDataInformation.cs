@@ -10,6 +10,7 @@ namespace AlphaS.DataAnalyzer
 {
     public class AnalyzedDataInformation : BasicDailyDataInformation
     {
+        public readonly static int RECENT_MIN_VOL_DAY= 60;
         public decimal avg;
         public decimal N_avg;
         public decimal N_open;
@@ -20,6 +21,8 @@ namespace AlphaS.DataAnalyzer
         public decimal volumePerOrder;
         public double divideWeight;
         public bool recentEmpty; //120day
+        public decimal recentMinVolume;
+        public DateTime recentMinVolumeDate; //60day
 
         static public Dictionary<string, int> parameterIndex = new Dictionary<string, int>();
         static AnalyzedDataInformation() { paramterIndexInitializer.initialize(); }
@@ -43,6 +46,8 @@ namespace AlphaS.DataAnalyzer
             avg = splitline[i++].getDecimalFromString();
             volumePerOrder = splitline[i++].getDecimalFromString();
             recentEmpty = splitline[i++].getBoolFromString();
+            recentMinVolume = splitline[i++].getDecimalFromString();
+            recentMinVolumeDate = splitline[i++].getDateTimeFromString();
             divide = splitline[i++].getDecimalFromString();
             divideWeight = splitline[i++].getDoubleFromString();
             N_open = splitline[i++].getDecimalFromString();
@@ -102,6 +107,8 @@ namespace AlphaS.DataAnalyzer
             sb.Append("\t" + avg.round(2).ToString());
             sb.Append("\t" + volumePerOrder.round(2).round(2).ToString());
             sb.Append("\t" + (recentEmpty ? "1" : "0"));
+            sb.Append("\t" + recentMinVolume.round(2).ToString());
+            sb.Append("\t" + recentMinVolumeDate.ToShortDateString());
             sb.Append("\t" + divide.round(2).ToString());
             sb.Append("\t" + divideWeight.round(2).ToString());
             sb.Append("\t" + N_open.round(2).ToString());

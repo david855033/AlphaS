@@ -19,7 +19,7 @@
                 <TextBox Width="50" Text="{Binding startYear}"/>
                 <TextBlock>Start Month</TextBlock>
                 <TextBox Width="50" Text="{Binding startMonth}"/>
-                <CheckBox Content="Read All" IsChecked="{Binding IsReadAll}"/>
+                <CheckBox Content="Force Read" IsChecked="{Binding IsReadAll}"/>
             </StackPanel>
             <DockPanel>
                 <Button Click="Button_Navigate_Click">Start Mission</Button>

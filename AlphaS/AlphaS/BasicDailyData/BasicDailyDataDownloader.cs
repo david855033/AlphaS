@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Navigation;
-using System.Reflection;
-using mshtml;
 using System.Windows.Forms;
 using System.Threading;
 using System.Text.RegularExpressions;
@@ -32,6 +29,10 @@ namespace AlphaS.BasicDailyData
             this.missionList = mission.ToList();
             totalMission = mission.Count();
         }
+        public int getMissionCount()
+        {
+            return missionList != null ? missionList.Count() : 0;
+        }
 
         List<BasicDailyDataInformation> BasicDailyDatas = new List<BasicDailyDataInformation>();
         public List<BasicDailyDataInformation> getResult()
@@ -47,7 +48,7 @@ namespace AlphaS.BasicDailyData
         BasicDailyDataMission currentMission;
         public DateTime missionStartTime;
 
-        public void startMission()
+        public void startMainMissionLoop()
         {
             missionStartTime = DateTime.Now;
             webBrowser.DocumentCompleted += analyzeHTML;
@@ -73,6 +74,7 @@ namespace AlphaS.BasicDailyData
                 if (isRetry)
                 {
                     setWebSite(webBrowser, currentMission.type, forceLoad: true);
+                    missionAssignedTime = DateTime.Now;
                 }
 
                 if (!querySend)

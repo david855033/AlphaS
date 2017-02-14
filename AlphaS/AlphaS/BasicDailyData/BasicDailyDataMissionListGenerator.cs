@@ -57,10 +57,10 @@ namespace AlphaS.BasicDailyData
                             index >= 0 &&
                                 (
                                     (
-                                        fileStatus[index].fileStatus == FileStatus.Temp 
+                                        fileStatus[index].fileStatus == FileStatus.Temp
                                         ||
                                         (
-                                            fileStatus[index].fileStatus == FileStatus.Null 
+                                            fileStatus[index].fileStatus == FileStatus.Null
                                             &&
                                             index >= fileStatus.Count() - 1
                                         )
@@ -68,6 +68,16 @@ namespace AlphaS.BasicDailyData
                                         fileStatus[index].modifiedTime.getDateTimeFromString()
                                         .ToString("yyyyMMdd") !=
                                         DateTime.Now.ToString("yyyyMMdd")
+                                            ||
+                                        (
+                                        fileStatus[index].modifiedTime.getDateTimeFromString()
+                                        .ToString("yyyyMMdd") ==
+                                        DateTime.Now.ToString("yyyyMMdd")
+                                            &&
+                                        fileStatus[index].modifiedTime.getDateTimeFromString().Hour < 16
+                                            &&
+                                        DateTime.Now.Hour >= 16
+                                        )
                                 )
                             )
                         {

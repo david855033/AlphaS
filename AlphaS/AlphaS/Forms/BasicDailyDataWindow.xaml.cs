@@ -77,11 +77,11 @@ namespace AlphaS.Forms
             missionListGenerator.setStockList(Core.stockListManager.getStockList());
 
             var missionList = missionListGenerator.getMissionList(viewModel.IsReadAll);
+            if (missionList.Count != 0) basicDailyDataDownloader.setMission(missionList);
 
-            while (missionList.Count != 0)
+            while (basicDailyDataDownloader.getMissionCount() > 0)
             {
-                basicDailyDataDownloader.setMission(missionList);
-                basicDailyDataDownloader.startMission();
+                basicDailyDataDownloader.startMainMissionLoop();
             }
 
         }

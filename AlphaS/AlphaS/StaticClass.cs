@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace AlphaS
 {
@@ -186,5 +188,13 @@ namespace AlphaS
             }
             return result;
         }
+
+
+        private static Action EmptyDelegate = delegate () { };
+        public static void Refresh(this UIElement uiElement)
+        {
+            uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+        }
     }
 }
+

@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using AlphaS.CoreNS;
 using AlphaS.DataAnalyzer;
-using AlphaS.BasicDailyData;
 using AlphaS.DataAnalyzer.ParameterCalculators;
+using System.Windows.Threading;
+using System.Threading;
+using System;
 
 namespace AlphaS.Forms
 {
@@ -45,27 +37,33 @@ namespace AlphaS.Forms
                 e.Cancel = true;
             }
         }
-
+        private void refreshText()
+        {
+            displayText.Text = viewModel.display;
+            this.displayText.Refresh();
+        }
         private void UpdateDiv(object sender, RoutedEventArgs e)
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
             var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
-
+            int count = 0, all = Core.stockListManager.getStockList().Count();
             foreach (var stock in Core.stockListManager.getStockList())
             {
                 string ID = stock.ID, type = stock.type;
-                viewModel.display += $"[UpdateDiv ID = {ID}]({type})\r\n";
+                string output = $"[UpdateDiv ID = {ID}]({type}) ({++count}/{all})\r\n";
                 dataAnalyzer.setStockType(type);
                 if (ID != "0050") dataAnalyzer.set0050BasicData(basicData0050);
                 dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
 
                 dataAnalyzer.standarizeAnalyzeData();
-                viewModel.display += dataAnalyzer.getDisplay();
+                output += dataAnalyzer.getDisplay();
+                viewModel.display = output + "\r\n" + viewModel.display;
 
                 Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
-                viewModel.display += "\r\n";
+
+                refreshText();
             }
         }
 
@@ -73,17 +71,21 @@ namespace AlphaS.Forms
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
+            int count = 0, all = Core.stockListManager.getStockList().Select(x => x.ID).Count();
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
-                viewModel.display += $"[GetFuturePrice ID = {ID}]\r\n";
+                string output =
+                 $"[CalculateParameter ID = {ID}]  ({++count}/{all})\r\n";
                 dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
 
                 dataAnalyzer.calculateParameter();
-                viewModel.display += dataAnalyzer.getDisplay();
+                output += dataAnalyzer.getDisplay();
 
                 Core.analyzedDataManager.saveAnalyzedData(ID, dataAnalyzer.getAnalyzedData());
-                viewModel.display += "\r\n";
+
+                viewModel.display = output + "\r\n" + viewModel.display;
+                refreshText();
             }
         }
 
@@ -92,19 +94,21 @@ namespace AlphaS.Forms
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
             var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
+            int count = 0, all = Core.stockListManager.getStockList().Select(x => x.ID).Count();
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
                 if (ID != "0050") dataAnalyzer.set0050BasicData(basicData0050);
-                viewModel.display += $"[GetFulturePrice ID = {ID}]\r\n";
+                string output = $"[GetFulturePrice ID = {ID}]  ({++count}/{all})\r\n";
                 dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
                 dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
 
                 dataAnalyzer.calculateFuturePriceData();
-                viewModel.display += dataAnalyzer.getDisplay();
+                output += dataAnalyzer.getDisplay();
 
                 Core.futurePriceDataManager.saveFuturePriceData(ID, dataAnalyzer.getFuturePriceData());
-                viewModel.display += "\r\n";
+                viewModel.display = output + "\r\n" + viewModel.display;
+                refreshText();
             }
         }
 
@@ -117,24 +121,21 @@ namespace AlphaS.Forms
             int MAX_FUTURE_PRICE_DAYAFTER = FuturePriceDataInformation.FUTURE_PRICE_DAYS.Last();
             dateList.RemoveRange(0, BaseParameterCalculator.PRE_DATA);
             dateList.RemoveRange(dateList.Count - 1 - MAX_FUTURE_PRICE_DAYAFTER + 2, MAX_FUTURE_PRICE_DAYAFTER - 2);
-
+            int count = 0, all = dateList.Count();
             foreach (var dateToCalculate in dateList)
             {
                 var futurePriceStockDataInADay = new List<FuturePriceStockInfromation>();
                 foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
                 {
                     var futurePriceData = Core.futurePriceDataManager.getFuturePriceData(ID);
-                    var findIndex = futurePriceData.FindIndex(x => x.date == dateToCalculate);
-                    if (findIndex >= 0)
+                    var indexInFuturePriceData = futurePriceData.FindIndex(x => x.date == dateToCalculate);
+                    if (indexInFuturePriceData >= 0)
                     {
-                        var matchedDateAndID = futurePriceData[findIndex];
+                        var matchedDateAndID = futurePriceData[indexInFuturePriceData];
                         var newData = new FuturePriceStockInfromation(ID, matchedDateAndID);
                         futurePriceStockDataInADay.Add(newData);
                     }
                 }
-
-                viewModel.display +=
-                    $"date = {dateToCalculate.ToShortDateString()} stockCount = {futurePriceStockDataInADay.Count()}\r\n";
 
                 for (int i = 0; i < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; i++)
                 {
@@ -163,6 +164,9 @@ namespace AlphaS.Forms
                     }
                     Core.futurePriceDataManager.saveFuturePriceData(ID, futurePriceData);
                 }
+                viewModel.display =
+                    $"date = {dateToCalculate.ToShortDateString()} stockCount = {futurePriceStockDataInADay.Count()} ({++count}/{all})\r\n" + viewModel.display;
+                refreshText();
             }
         }
 
@@ -174,10 +178,10 @@ namespace AlphaS.Forms
             {
                 Core.parameterFuturePriceTableManager.resetParameterFuturePriceTable(parameterName);
             }
-
+            int count = 0, all = Core.stockListManager.getStockList().Select(x => x.ID).Count();
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
-                viewModel.display += $"[Append Parameter Future Price, ID = {ID}]\r\n";
+                string output = $"[Append Parameter Future Price, ID = {ID}]   ({++count}/{all})\r\n";
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
                 dataAnalyzer.setFuturePriceData(Core.futurePriceDataManager.getFuturePriceData(ID));
 
@@ -191,8 +195,9 @@ namespace AlphaS.Forms
                     Core.parameterFuturePriceTableManager.appendParameterFuturePrice(parameterName, dataToAppend);
                 }
 
-                viewModel.display += dataAnalyzer.getDisplay();
-                viewModel.display += "\r\n";
+                output += dataAnalyzer.getDisplay();
+                viewModel.display = output + "\r\n" + viewModel.display;
+                refreshText();
             }
         }
 
@@ -200,15 +205,19 @@ namespace AlphaS.Forms
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
+            int count = 0, all = AnalyzedDataInformation.parameterIndex.Keys.Count();
             foreach (string parameterName in AnalyzedDataInformation.parameterIndex.Keys)
             {
                 dataAnalyzer.setParameterFuturePriceTableData(
                     Core.parameterFuturePriceTableManager.getParameterFuturePriceTable(parameterName));
 
                 dataAnalyzer.calculateParameterFuturePriceTable();
+                viewModel.display = $"CalculateParameterFuturePriceTable: {parameterName} ({++count}/{all})\r\n" + viewModel.display;
 
                 Core.finalParameterFuturePriceTableManager.saveParameterFuturePriceTable(
                     parameterName, dataAnalyzer.getFinalParameterFuturePriceTableData());
+
+                refreshText();
             }
         }
 
@@ -222,6 +231,7 @@ namespace AlphaS.Forms
                 dataAnalyzer.appendParameterFuturePriceDictionary(parameterName, Core.finalParameterFuturePriceTableManager.getParameterFuturePriceTable(parameterName));
             }
 
+            int count = 0, all = Core.stockListManager.getStockList().Select(x => x.ID).Count();
             foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
             {
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
@@ -231,8 +241,8 @@ namespace AlphaS.Forms
 
                 Core.scoreDataManager.saveScoreData(ID, dataAnalyzer.getScoreData());
 
-                viewModel.display += dataAnalyzer.getDisplay();
-                viewModel.display += "\r\n";
+                viewModel.display = $"get stock score{ID}  ({++count}/{all})\r\n" + dataAnalyzer.getDisplay() + "\r\n" + viewModel.display;
+                refreshText();
             }
         }
 
@@ -254,7 +264,9 @@ namespace AlphaS.Forms
 
                 viewModel.display += dataAnalyzer.getDisplay();
                 viewModel.display += "\r\n";
+                refreshText();
             }
         }
+
     }
 }
