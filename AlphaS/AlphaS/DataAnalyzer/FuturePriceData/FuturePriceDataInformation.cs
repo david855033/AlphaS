@@ -14,6 +14,7 @@ namespace AlphaS.DataAnalyzer
         // ParameterFuturePriceTableInformation內要一樣
 
         public DateTime date;
+        public bool isLowVolume;
         public decimal?[] futurePrices = new decimal?[FUTURE_PRICE_DAYS.Length];
         public decimal?[] futurePriceRank = new decimal?[FUTURE_PRICE_DAYS.Length];
 
@@ -29,6 +30,7 @@ namespace AlphaS.DataAnalyzer
             var splitline = loadString.Split('\t');
             int i = 0;
             date = splitline[i++].getDateTimeFromString();
+            isLowVolume = splitline[i++].getBoolFromString();
             if (splitline.Length > i)
             {
                 int x = i;
@@ -60,12 +62,14 @@ namespace AlphaS.DataAnalyzer
         public FuturePriceDataInformation(BasicDailyDataInformation basicDailyDataInformation)
         {
             date = basicDailyDataInformation.date;
+            isLowVolume = false;
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(date.ToString("yyyy-MM-dd"));
+            sb.Append("\t" + (isLowVolume ? "1" : "0").ToString());
             for (int i = 0; i < futurePrices.Length; i++)
             {
                 if (futurePrices[i] != null)

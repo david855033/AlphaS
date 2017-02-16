@@ -122,16 +122,27 @@ namespace AlphaS.Forms
             dateList.RemoveRange(0, BaseParameterCalculator.PRE_DATA);
             dateList.RemoveRange(dateList.Count - 1 - MAX_FUTURE_PRICE_DAYAFTER + 2, MAX_FUTURE_PRICE_DAYAFTER - 2);
             int count = 0, all = dateList.Count();
+
+            var futurePriceDataHolder = new Dictionary<string, List<FuturePriceDataInformation>>();
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                futurePriceDataHolder.Add(ID, Core.futurePriceDataManager.getFuturePriceData(ID));
+            }
+            viewModel.display += $"load {futurePriceDataHolder.Count()} future price files";
+            refreshText();
+
             foreach (var dateToCalculate in dateList)
             {
                 var futurePriceStockDataInADay = new List<FuturePriceStockInfromation>();
                 foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
                 {
-                    var futurePriceData = Core.futurePriceDataManager.getFuturePriceData(ID);
+                    var futurePriceData = futurePriceDataHolder[ID];
                     var indexInFuturePriceData = futurePriceData.FindIndex(x => x.date == dateToCalculate);
                     if (indexInFuturePriceData >= 0)
                     {
                         var matchedDateAndID = futurePriceData[indexInFuturePriceData];
+                        if (matchedDateAndID.isLowVolume) { continue; }
+
                         var newData = new FuturePriceStockInfromation(ID, matchedDateAndID);
                         futurePriceStockDataInADay.Add(newData);
                     }
@@ -155,26 +166,35 @@ namespace AlphaS.Forms
                     var findIndexStock = futurePriceStockDataInADay.FindIndex(x => x.stockID == ID);
                     if (findIndexStock >= 0 && futurePriceStockDataInADay[findIndexStock].futurePriceRank.Contains(null))
                         break;
-                    var futurePriceData = Core.futurePriceDataManager.getFuturePriceData(ID);
+                    var futurePriceData = futurePriceDataHolder[ID];
                     var findIndexDate = futurePriceData.FindIndex(x => x.date == dateToCalculate);
                     if (findIndexDate >= 0 && findIndexStock >= 0)
                     {
                         futurePriceData[findIndexDate].futurePriceRank =
                             futurePriceStockDataInADay[findIndexStock].futurePriceRank;
                     }
-                    Core.futurePriceDataManager.saveFuturePriceData(ID, futurePriceData);
                 }
                 viewModel.display =
                     $"date = {dateToCalculate.ToShortDateString()} stockCount = {futurePriceStockDataInADay.Count()} ({++count}/{all})\r\n" + viewModel.display;
                 refreshText();
             }
+            viewModel.display =
+                    $"saving result...\r\n" + viewModel.display;
+            refreshText();
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                Core.futurePriceDataManager.saveFuturePriceData(ID, futurePriceDataHolder[ID]);
+            }
+            viewModel.display =
+                    $"done!\r\n" + viewModel.display;
+            refreshText();
         }
 
         private void AppendParameterFuturePriceTable(object sender, RoutedEventArgs e)
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
-            foreach (string parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+            foreach (string parameterName in AnalyzedDataInformation.parameterIndexForScore.Keys)
             {
                 Core.parameterFuturePriceTableManager.resetParameterFuturePriceTable(parameterName);
             }
@@ -205,8 +225,8 @@ namespace AlphaS.Forms
         {
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
-            int count = 0, all = AnalyzedDataInformation.parameterIndex.Keys.Count();
-            foreach (string parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+            int count = 0, all = AnalyzedDataInformation.parameterIndexForScore.Keys.Count();
+            foreach (string parameterName in AnalyzedDataInformation.parameterIndexForScore.Keys)
             {
                 dataAnalyzer.setParameterFuturePriceTableData(
                     Core.parameterFuturePriceTableManager.getParameterFuturePriceTable(parameterName));
@@ -226,7 +246,7 @@ namespace AlphaS.Forms
             IDataAnalyzer dataAnalyzer = new DataAnalyzer.DataAnalyzer();
             viewModel.display = "";
             dataAnalyzer.resetParameterFuturePriceDictionary();
-            foreach (string parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+            foreach (string parameterName in AnalyzedDataInformation.parameterIndexForScore.Keys)
             {
                 dataAnalyzer.appendParameterFuturePriceDictionary(parameterName, Core.finalParameterFuturePriceTableManager.getParameterFuturePriceTable(parameterName));
             }
@@ -268,5 +288,25 @@ namespace AlphaS.Forms
             }
         }
 
+        private void MakeDailyChart(object sender, RoutedEventArgs e)
+        {
+            viewModel.display = "";
+            var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
+            var dateList = basicData0050.Select(x => x.date).ToList();
+            int count = 0, all = dateList.Count();
+
+            var futurePriceDataHolder = new Dictionary<string, List<FuturePriceDataInformation>>();
+            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                futurePriceDataHolder.Add(ID, Core.futurePriceDataManager.getFuturePriceData(ID));
+            }
+            viewModel.display += $"load {futurePriceDataHolder.Count()} future price files";
+            refreshText();
+
+            foreach (var dateToCalculate in dateList)
+            {
+
+            }
+        }
     }
 }

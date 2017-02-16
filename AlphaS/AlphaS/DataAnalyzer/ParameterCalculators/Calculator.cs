@@ -11,73 +11,73 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
     {
         public static void initialize()
         {
-            addParameter("Change");
-            addParameter("ChangeAvg");
+            addParameter("Change", true);
+            addParameter("ChangeAvg", true);
 
             foreach (int day in new int[] { 5, 20, 40, 60, 120 })
             {
-                addParameter($"MA{day}");
-                addParameter($"BA{day}");
+                addParameter($"MA{day}", false);
+                addParameter($"BA{day}", true);
                 foreach (int day_base in new int[] { 5, 20, 40, 60, 120 })
                 {
                     if (day_base > day)
                     {
-                        addParameter($"BA{day}_{day_base}");
+                        addParameter($"BA{day}_{day_base}", true);
                     }
                 }
             }
 
             foreach (int day in new int[] { 5, 20, 60, 120 })
             {
-                addParameter($"VMA{day}");
-                addParameter($"VBA{day}");
+                addParameter($"VMA{day}", true);
+                addParameter($"VBA{day}", true);
                 foreach (int day_base in new int[] { 5, 20, 60, 120 })
                 {
                     if (day_base > day)
                     {
-                        addParameter($"VBA{day}_{day_base}");
+                        addParameter($"VBA{day}_{day_base}", true);
                     }
                 }
             }
 
             foreach (int day in new int[] { 5, 20, 40, 60, 120 })
             {
-                addParameter($"VolumeSum{day}");
-                addParameter($"DealedStockSum{day}");
-                addParameter($"MeanCost{day}");
-                addParameter($"PriceCostBias{day}");
-                addParameter($"AverageCostBias{day}");
+                addParameter($"VolumeSum{day}", false);
+                addParameter($"DealedStockSum{day}", false);
+                addParameter($"MeanCost{day}", false);
+                addParameter($"PriceCostBias{day}", true);
+                addParameter($"AverageCostBias{day}", true);
             }
 
             foreach (int day in new int[] { 5, 20, 40, 60 })
             {
-                addParameter($"MeanVolumePerOrder{day}");
-                addParameter($"BiasVolumePerOrder{day}");
+                addParameter($"MeanVolumePerOrder{day}", true);
+                addParameter($"BiasVolumePerOrder{day}", true);
                 foreach (int day_base in new int[] { 5, 20, 40, 60 })
                 {
                     if (day_base > day)
                     {
-                        addParameter($"BiasVolumePerOrder{day}_{day_base}");
+                        addParameter($"BiasVolumePerOrder{day}_{day_base}", true);
                     }
                 }
             }
 
             foreach (int day in new int[] { 5, 20, 40, 60 })
             {
-                addParameter($"RSV{day}");
-                addParameter($"K{day}");
-                addParameter($"D{day}");
-                addParameter($"J{day}");
+                addParameter($"RSV{day}", true);
+                addParameter($"K{day}", true);
+                addParameter($"D{day}", true);
+                addParameter($"J{day}", true);
             }
 
             foreach (int day in new int[] { 5, 20, 40, 60 })
             {
-                addParameter($"RSI{day}");
+                addParameter($"RSI{day}", true);
                 foreach (int day_base in new int[] { 5, 20, 40, 60 })
                 {
                     if (day_base > day)
                     {
-                        addParameter($"RSI{day}_{day_base}");
+                        addParameter($"RSI{day}_{day_base}", true);
                     }
                 }
             }
@@ -91,9 +91,14 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
             }
         }
 
-        static void addParameter(string parameterName)
+        static void addParameter(string parameterName, bool isForScore)
         {
+            if (isForScore)
+            {
+                AnalyzedDataInformation.parameterIndexForScore.Add(parameterName, AnalyzedDataInformation.parameterIndex.Count);
+            }
             AnalyzedDataInformation.parameterIndex.Add(parameterName, AnalyzedDataInformation.parameterIndex.Count);
+
         }
     }
 
@@ -460,7 +465,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 s += dayToCount + "/";
 
                 decimal incresingSum = 0, decreasingSum = 0;
-                for (int i = startCalculationIndex - dayToCount; 
+                for (int i = startCalculationIndex - dayToCount;
                     i < startCalculationIndex && i < existAnalyzeDataCount; i++)
                 {
                     decimal N_change = AnalyzedData[i].N_close - AnalyzedData[i - 1].N_close;

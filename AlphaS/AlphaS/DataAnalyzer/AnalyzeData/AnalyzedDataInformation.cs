@@ -25,6 +25,7 @@ namespace AlphaS.DataAnalyzer
         public DateTime recentMinVolumeDate; //60day
 
         static public Dictionary<string, int> parameterIndex = new Dictionary<string, int>();
+        static public Dictionary<string, int> parameterIndexForScore = new Dictionary<string, int>();
         static AnalyzedDataInformation() { paramterIndexInitializer.initialize(); }
 
         public Nullable<decimal>[] parameters =

@@ -10,7 +10,7 @@ namespace AlphaS.DataAnalyzer
 {
     public class DataAnalyzer : IDataAnalyzer
     {
-        public static readonly decimal MIN_VOLUME_THRESHOLD = 25000; //unit: k NTD -> 2500w
+        public static readonly decimal MIN_VOLUME_THRESHOLD = 15000; //unit: k NTD -> 2500w
         private string stockType;
         public void setStockType(string type)
         {
@@ -264,12 +264,14 @@ namespace AlphaS.DataAnalyzer
             int belowMinVolumeCount = 0;
             for (int i = startCalculationIndex; i <= endCalculationIndex; i++)
             {
+
+                var newFuturePriceData = new FuturePriceDataInformation(analyzedData[i]);
+
                 if (analyzedData[i].recentMinVolume < MIN_VOLUME_THRESHOLD)
                 {
                     belowMinVolumeCount++;
-                    continue;
-                }//todo
-                var newFuturePriceData = new FuturePriceDataInformation(analyzedData[i]);
+                    newFuturePriceData.isLowVolume = true;
+                }
 
                 for (int n = 0; n < FuturePriceDataInformation.FUTURE_PRICE_DAYS.Length; n++)
                 {
@@ -295,7 +297,7 @@ namespace AlphaS.DataAnalyzer
         public void getParameterFuturePriceTableDataToAppend(Dictionary<string, List<ParameterFuturePriceTableInformation>> allDataToAppend)
         {
             display = "";
-            var parameterIndex = AnalyzedDataInformation.parameterIndex;
+            var parameterIndex = AnalyzedDataInformation.parameterIndexForScore;
 
             var dateList = from q in futurePriceData select q.date;
 
@@ -365,17 +367,17 @@ namespace AlphaS.DataAnalyzer
                 if (hasInvalidData) continue;
 
                 var currentData = currentAnalyzedData.date;
-                int totalParameterCount = AnalyzedDataInformation.parameterIndex.Count();
+                int totalParameterCount = AnalyzedDataInformation.parameterIndexForScore.Count();
 
                 var newScoreData = new ScoreDataInformation();
                 newScoreData.date = currentData;
 
                 decimal[] valueScore = new decimal[ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length];
                 decimal[] rankScore = new decimal[ScoreDataInformation.SCORE_DAY_RANGE_DEFINITION.Length];
-                foreach (var parameterName in AnalyzedDataInformation.parameterIndex.Keys)
+                foreach (var parameterName in AnalyzedDataInformation.parameterIndexForScore.Keys)
                 {
                     var lookUpTable = parameterFuturePriceDictionary[parameterName];
-                    var index = AnalyzedDataInformation.parameterIndex[parameterName];
+                    var index = AnalyzedDataInformation.parameterIndexForScore[parameterName];
                     var parameterValue = currentAnalyzedData.parameters[index].GetValueOrDefault();
                     decimal?[] logArray = lookUpLogFromParameter(parameterValue, lookUpTable);
                     decimal?[] rankArray = lookUpRankFromParameter(parameterValue, lookUpTable);
@@ -383,8 +385,8 @@ namespace AlphaS.DataAnalyzer
                     rankScore = rankScore.addUpDecimalArray(getScoreFromArray(rankArray));
                 }
 
-                newScoreData.valueScore = valueScore.divideElementBy(AnalyzedDataInformation.parameterIndex.Keys.Count).exp().round(2);
-                newScoreData.rankScore = rankScore.divideElementBy(AnalyzedDataInformation.parameterIndex.Keys.Count).round(2);
+                newScoreData.valueScore = valueScore.divideElementBy(AnalyzedDataInformation.parameterIndexForScore.Keys.Count).exp().round(2);
+                newScoreData.rankScore = rankScore.divideElementBy(AnalyzedDataInformation.parameterIndexForScore.Keys.Count).round(2);
 
                 scoreData.Add(newScoreData);
             }
@@ -479,7 +481,11 @@ namespace AlphaS.DataAnalyzer
             {
                 int indexOfCutoff = allParameterValues.Count * (i + 1) / PARAMETER_GROUP_COUNT;
                 cutoffs[i] = allParameterValues[indexOfCutoff];
-                if (i > 0 && cutoffs[i] == cutoffs[i - 1]) cutoffs[i] += 0.01M;
+                if (i > 0 && cutoffs[i] == cutoffs[i - 1])
+                {
+                    cutoffs[i - 1] -= 0.01M;
+                    cutoffs[i] += 0.01M;
+                }
             }
 
             foreach (var data in parameterFuturePriceTableData)
@@ -502,15 +508,25 @@ namespace AlphaS.DataAnalyzer
                 {
                     {
                         var queryPriceLogs = from q in futurePriceLogsGroupByParameter[i]
+                                             where q[j].HasValue
                                              orderby q[j]
-                                             select q[j];
-                        finalFuturePriceLogsTable[i, j] = queryPriceLogs.ToArray()[queryPriceLogs.Count() / 2].Value;
+                                             select q[j].Value;
+                        var resultArray = queryPriceLogs.ToArray();
+                        Array.Sort(resultArray);
+                        int quaterCount = resultArray.Length / 4;
+                        var resultArrayInMidQuater = resultArray.Skip(quaterCount).Take(quaterCount * 2);
+                        finalFuturePriceLogsTable[i, j] = resultArrayInMidQuater.getAverage();
                     }
                     {
                         var queryPriceRanks = from q in futurePriceRanksGroupByParameter[i]
+                                              where q[j].HasValue
                                               orderby q[j]
-                                              select q[j];
-                        finalFuturePriceRanksTable[i, j] = queryPriceRanks.ToArray()[queryPriceRanks.Count() / 2].Value;
+                                              select q[j].Value;
+                        var resultArray = queryPriceRanks.ToArray();
+                        Array.Sort(resultArray);
+                        int quaterCount = resultArray.Length / 4;
+                        var resultArrayInMidQuater = resultArray.Skip(quaterCount).Take(quaterCount * 2);
+                        finalFuturePriceRanksTable[i, j] = resultArrayInMidQuater.getAverage();
                     }
                 }
             }
@@ -561,19 +577,20 @@ namespace AlphaS.DataAnalyzer
             {
                 if (availbleFutrePriceDates.BinarySearch(d) >= 0)
                 {
-                    availableDate.Add(d);
+                    if (!futurePriceData.Find(x => x.date == d).isLowVolume)
+                    {
+                        availableDate.Add(d);
+                    }
                 }
             }
 
             foreach (var d in availableDate)
             {
                 var scoreFuturePriceToAdd = new ScoreFuturePriceDataInformation();
-
                 scoreFuturePriceToAdd.valueScore = scoreData.Find(x => x.date == d).valueScore;
                 scoreFuturePriceToAdd.rankScore = scoreData.Find(x => x.date == d).rankScore;
                 scoreFuturePriceToAdd.futurePriceRank = futurePriceData.Find(x => x.date == d).futurePriceRank;
                 scoreFuturePriceToAdd.futurePrices = futurePriceData.Find(x => x.date == d).futurePrices;
-
                 scoreFuturePriceTable.Add(scoreFuturePriceToAdd);
             }
         }

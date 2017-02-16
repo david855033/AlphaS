@@ -189,6 +189,14 @@ namespace AlphaS
             return result;
         }
 
+        public static decimal getAverage(this IEnumerable<decimal> input)
+        {
+            decimal sum = 0;
+            foreach (var i in input)
+                sum += i;
+            return sum / input.Count();
+        }
+
 
         private static Action EmptyDelegate = delegate () { };
         public static void Refresh(this UIElement uiElement)
