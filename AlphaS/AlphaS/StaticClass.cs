@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -106,6 +107,15 @@ namespace AlphaS
             DateTime result;
             success = DateTime.TryParse(input, out result);
             return result;
+        }
+
+        public static DateTime getDateTimeFromFileName(this string input)
+        {             
+            return DateTime.ParseExact(input, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        }
+        public static string getFileNameFromDateTime(this DateTime input)
+        {
+            return input.ToString("yyyy-MM-dd");
         }
 
         public static DateTime getDateTimeFromStringMK(this string input)

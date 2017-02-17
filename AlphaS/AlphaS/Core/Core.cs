@@ -41,6 +41,9 @@ namespace AlphaS.CoreNS
         static readonly string SCORE_FUTURE_PRICE_DATA_FOLDER = DEFAULT_FOLDER + "\\" + "ScoreFuturePrice";
         public static readonly IScoreFuturePriceTableManager scoreFuturePriceTableManager = new ScoreFuturePriceTableManager(SCORE_FUTURE_PRICE_DATA_FOLDER);
 
+        static readonly string DAILY_CHART_FOLDER = DEFAULT_FOLDER + "\\" + "DailyChart";
+        public static readonly IDailyChartDataManager dailyChartDataManager = new DailyChartDataManager(DAILY_CHART_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()

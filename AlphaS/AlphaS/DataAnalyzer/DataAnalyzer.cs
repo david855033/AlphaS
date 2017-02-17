@@ -10,7 +10,7 @@ namespace AlphaS.DataAnalyzer
 {
     public class DataAnalyzer : IDataAnalyzer
     {
-        public static readonly decimal MIN_VOLUME_THRESHOLD = 15000; //unit: k NTD -> 2500w
+        public static readonly decimal MIN_VOLUME_THRESHOLD = 5000; //unit: k NTD -> 2500w
         private string stockType;
         public void setStockType(string type)
         {

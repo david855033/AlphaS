@@ -291,22 +291,102 @@ namespace AlphaS.Forms
         private void MakeDailyChart(object sender, RoutedEventArgs e)
         {
             viewModel.display = "";
+
+            var stockList = Core.stockListManager.getStockList().Select(x => x.ID);
+
             var basicData0050 = Core.basicDailyDataManager.getBasicDailyData("0050");
             var dateList = basicData0050.Select(x => x.date).ToList();
-            int count = 0, all = dateList.Count();
+            var existedDateList = Core.dailyChartDataManager.getExistedDate();
+            existedDateList.Sort();
+            var toCalculateDateList = from q in dateList where existedDateList.BinarySearch(q) < 0 select q;
 
-            var futurePriceDataHolder = new Dictionary<string, List<FuturePriceDataInformation>>();
-            foreach (var ID in Core.stockListManager.getStockList().Select(x => x.ID))
-            {
-                futurePriceDataHolder.Add(ID, Core.futurePriceDataManager.getFuturePriceData(ID));
-            }
-            viewModel.display += $"load {futurePriceDataHolder.Count()} future price files";
+            int count = 0,
+                allCount = dateList.Count(),
+                existedCount = existedDateList.Count(),
+                toCalculateCount = toCalculateDateList.Count(); ;
+
+            viewModel.display = $"all count = {allCount}, existed count = {existedCount}, to Calculate = {toCalculateCount}";
             refreshText();
 
-            foreach (var dateToCalculate in dateList)
+            var AnalyzedDataHolder = new Dictionary<string, List<AnalyzedDataInformation>>();
+            var ScoreDataHolder = new Dictionary<string, List<ScoreDataInformation>>();
+            int stockCount = 0;
+            foreach (var ID in stockList)
             {
+                var analyzedDataToCalculate = (from q in Core.analyzedDataManager.getAnalyzedData(ID)
+                                               where toCalculateDateList.Contains(q.date)
+                                               select q).ToList();
+                AnalyzedDataHolder.Add(ID, analyzedDataToCalculate);
 
+                var scoreDataToCalculate = (from q in Core.scoreDataManager.getScoreData(ID)
+                                            where toCalculateDateList.Contains(q.date)
+                                            select q).ToList();
+                ScoreDataHolder.Add(ID, scoreDataToCalculate);
+                viewModel.display = $"load stock: {ID} for analyzed & score files ({++stockCount}/{stockList.Count()})" + "\r\n" + viewModel.display;
+                refreshText();
             }
+            viewModel.display = $"load {AnalyzedDataHolder.Count()} analyzed & score files" + "\r\n" + viewModel.display;
+            refreshText();
+
+            foreach (var currentDate in toCalculateDateList)
+            {
+                viewModel.display = $"date: {currentDate.ToShortDateString()} ({++count}/{toCalculateCount})" +
+                    "\r\n" + viewModel.display;
+                refreshText();
+                var newDailyChart = new List<DailyChartInformation>();
+                foreach (var ID in stockList)
+                {
+                    var selectedAnalyzedData = AnalyzedDataHolder[ID].Find(x => x.date == currentDate);
+                    var selectedScoreData = ScoreDataHolder[ID].Find(x => x.date == currentDate);
+                    if (selectedAnalyzedData != null && selectedScoreData != null)
+                    {
+                        var newDailyChartData = new DailyChartInformation(ID, selectedAnalyzedData, selectedScoreData);
+                        newDailyChart.Add(newDailyChartData);
+                    }
+                }
+                Core.dailyChartDataManager.saveDailyChart(currentDate, newDailyChart);
+            }
+
+            viewModel.display = $"done!!" + "\r\n" + viewModel.display;
+            refreshText();
         }
+
+        private void TradeSimulation(object sender, RoutedEventArgs e)
+        {
+            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2007-01-01".getDateTimeFromFileName());
+            dateList.Sort();
+            TradeSimulator tradeSimulator = new TradeSimulator();
+            tradeSimulator.addTradingProtocals(
+                new TradingProtocal()
+                {
+                    buyThreshold = 0.2M,
+                    sellThreshold = 0.1M,
+                    sellThresholdDay = 3,
+                    divideParts = 5,
+                    valueScoreWeight = new decimal[] { 1, 1 },
+                    rankScoreWeight = new decimal[] { 0, 0 },
+                    sellRankThreshold = 0
+                });
+            tradeSimulator.initializedTradeSim();
+
+            foreach (var currentDate in dateList)
+            {
+                tradeSimulator.goNextDay(currentDate,Core.dailyChartDataManager.getDailyChart(currentDate));
+            }
+
+        }
+
+        private void GroupOrder(object sender, RoutedEventArgs e)
+        {
+            UpdateDiv(sender, e);
+            CalculateParameter(sender, e);
+            GetFulturePrice(sender, e);
+            GetFulturePriceRank(sender, e);
+            AppendParameterFuturePriceTable(sender, e);
+            CalculateParameterFuturePriceTable(sender, e);
+            GetStockScore(sender, e);
+            MakeDailyChart(sender, e);
+        }
+
     }
 }

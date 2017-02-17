@@ -90,7 +90,9 @@
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataMissionListGenerator.cs" />
+    <Compile Include="DataAnalyzer\DailyChart\DailyChartDataManager.cs" />
     <Compile Include="DataAnalyzer\DailyChart\DailyChartInformation.cs" />
+    <Compile Include="DataAnalyzer\DailyChart\IDailyChartDataManager.cs" />
     <Compile Include="DataAnalyzer\FuturePriceRankData\FuturePriceStockInfromation.cs" />
     <Compile Include="DataAnalyzer\ParameterFuturePriceTable\ParameterFuturePriceTableManager.cs" />
     <Compile Include="DataAnalyzer\ParameterFuturePriceTable\ParameterFuturePriceTableInformation.cs" />
@@ -112,6 +114,12 @@
     <Compile Include="DataAnalyzer\ScoreData\IScoreDataManager.cs" />
     <Compile Include="DataAnalyzer\ScoreData\ScoreDataInformation.cs" />
     <Compile Include="DataAnalyzer\ScoreData\ScoreDataManager.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\ITradeSimulator.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradeAction.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradeRecord.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\Trader.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradeSimulator.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradingProtocal.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
     </Compile>
