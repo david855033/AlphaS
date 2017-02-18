@@ -7,6 +7,7 @@ using AlphaS.DataAnalyzer.ParameterCalculators;
 using System.Windows.Threading;
 using System.Threading;
 using System;
+using System.IO;
 
 namespace AlphaS.Forms
 {
@@ -353,27 +354,30 @@ namespace AlphaS.Forms
 
         private void TradeSimulation(object sender, RoutedEventArgs e)
         {
-            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2007-01-01".getDateTimeFromFileName());
+            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2012-01-01".getDateTimeFromFileName());
             dateList.Sort();
             TradeSimulator tradeSimulator = new TradeSimulator();
             tradeSimulator.addTradingProtocals(
                 new TradingProtocal()
                 {
-                    buyThreshold = 0.2M,
-                    sellThreshold = 0.1M,
+                    buyThreshold = 0.3M,
+                    buyPriceFromClose = 1,
+                    sellThreshold = 0.2M,
                     sellThresholdDay = 3,
+                    sellRankThreshold = 0,
+                    sellPriceFromClose = 1,
                     divideParts = 5,
                     valueScoreWeight = new decimal[] { 1, 1 },
-                    rankScoreWeight = new decimal[] { 0, 0 },
-                    sellRankThreshold = 0
+                    rankScoreWeight = new decimal[] { 0, 0 }
                 });
             tradeSimulator.initializedTradeSim();
 
             foreach (var currentDate in dateList)
             {
-                tradeSimulator.goNextDay(currentDate,Core.dailyChartDataManager.getDailyChart(currentDate));
+                tradeSimulator.goNextDay(currentDate, Core.dailyChartDataManager.getDailyChart(currentDate));
             }
-
+            tradeSimulator.endSimulation(dateList.Last());
+            Core.tradeSimWriter.write(tradeSimulator.getTradeResult());
         }
 
         private void GroupOrder(object sender, RoutedEventArgs e)

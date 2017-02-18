@@ -44,6 +44,9 @@ namespace AlphaS.CoreNS
         static readonly string DAILY_CHART_FOLDER = DEFAULT_FOLDER + "\\" + "DailyChart";
         public static readonly IDailyChartDataManager dailyChartDataManager = new DailyChartDataManager(DAILY_CHART_FOLDER);
 
+        static readonly string TRADE_SIM_RESULT_FOLDER = DEFAULT_FOLDER + "\\" + "TradeSims";
+        public static readonly ITradeSimWriter tradeSimWriter = new TradeSimWriter(TRADE_SIM_RESULT_FOLDER);
+
         public static bool closeAllWindow = false;
 
         static Core()

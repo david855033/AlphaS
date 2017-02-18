@@ -31,15 +31,24 @@ namespace AlphaS.DataAnalyzer
             }
         }
 
-
-        public List<string> getTradeResult()
+        public void endSimulation(DateTime currentDate)
         {
-            List<string> resultList = new List<string>();
             foreach (var trader in traders)
             {
-                resultList.Add(trader.getResult());
+                trader.endSimulation(currentDate);
             }
-            return resultList;
         }
+
+        public string getTradeResult()
+        {
+            string result = "";
+            foreach (var trader in traders)
+            {
+                result += (trader.getResult()) + "\r\n";
+            }
+            return result;
+        }
+
+       
     }
 }

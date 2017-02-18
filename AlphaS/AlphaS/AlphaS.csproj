@@ -119,6 +119,8 @@
     <Compile Include="DataAnalyzer\TradeSimulator\TradeRecord.cs" />
     <Compile Include="DataAnalyzer\TradeSimulator\Trader.cs" />
     <Compile Include="DataAnalyzer\TradeSimulator\TradeSimulator.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradeSimWriter\TradeSimWriter.cs" />
+    <Compile Include="DataAnalyzer\TradeSimulator\TradeSimWriter\ITradeSimWriter.cs" />
     <Compile Include="DataAnalyzer\TradeSimulator\TradingProtocal.cs" />
     <Compile Include="Forms\BasicDailyDataWindow.xaml.cs">
       <DependentUpon>BasicDailyDataWindow.xaml</DependentUpon>
