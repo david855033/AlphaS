@@ -354,30 +354,43 @@ namespace AlphaS.Forms
 
         private void TradeSimulation(object sender, RoutedEventArgs e)
         {
-            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2012-01-01".getDateTimeFromFileName());
+            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2014-01-01".getDateTimeFromFileName());
             dateList.Sort();
             TradeSimulator tradeSimulator = new TradeSimulator();
-            tradeSimulator.addTradingProtocals(
-                new TradingProtocal()
-                {
-                    buyThreshold = 0.3M,
-                    buyPriceFromClose = 1,
-                    sellThreshold = 0.2M,
-                    sellThresholdDay = 3,
-                    sellRankThreshold = 0,
-                    sellPriceFromClose = 1,
-                    divideParts = 5,
-                    valueScoreWeight = new decimal[] { 1, 1 },
-                    rankScoreWeight = new decimal[] { 0, 0 }
-                });
+            tradeSimulator.addTradingProtocals(generateTradProtocals());
             tradeSimulator.initializedTradeSim();
-
             foreach (var currentDate in dateList)
             {
                 tradeSimulator.goNextDay(currentDate, Core.dailyChartDataManager.getDailyChart(currentDate));
             }
             tradeSimulator.endSimulation(dateList.Last());
-            Core.tradeSimWriter.write(tradeSimulator.getTradeResult());
+
+        }
+
+        private List<TradingProtocal> generateTradProtocals()
+        {
+            List<TradingProtocal> result = new List<TradingProtocal>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 20; j++)
+                {
+                    result.Add(new TradingProtocal()
+                    {
+                        valueScoreWeight = new decimal[] { 1m, 1m },
+                        rankScoreWeight = new decimal[] { 1m, 1m },
+                        divideParts = 10,
+                        buyScoreThreshold = 0.4m,
+                        sellScoreThreshold = 0.1m + j * 0.02m,
+                        sellScoreThresholdDay = i,
+                        sellRankThreshold = 0,
+                        buyPriceFromClose = 1,
+                        sellPriceFromClose = 1
+                    });
+                }
+            }
+
+            return result;
         }
 
         private void GroupOrder(object sender, RoutedEventArgs e)

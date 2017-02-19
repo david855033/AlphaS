@@ -20,7 +20,7 @@ namespace AlphaS.DataAnalyzer
         public int totalTradeDays;
         public decimal inMoney;
         public decimal currentValue {
-            get { return (inMoney * profitPercentage.round(4)); }
+            get { return (inMoney * profitRatio).round(4); }
         }
 
         public int totalDays
@@ -34,7 +34,7 @@ namespace AlphaS.DataAnalyzer
                 return 0;
             }
         }
-        public decimal profitPercentage
+        public decimal profitRatio
         {
             get
             {

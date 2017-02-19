@@ -18,6 +18,7 @@ namespace AlphaS.DataAnalyzer
         public DateTime date;
         public string action;
         public string ID;
+        public decimal buyAmount;
         public decimal bidPrice;
         public string orderMessage;
         public string excuteMessage;

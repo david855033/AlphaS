@@ -9,6 +9,6 @@ namespace AlphaS.DataAnalyzer
     public interface ITradeSimWriter
     {
         void setBaseFolder(string folder);
-        void write(string toWrite);
+        void write(string toWrite, string fileName, bool append);
     }
 }

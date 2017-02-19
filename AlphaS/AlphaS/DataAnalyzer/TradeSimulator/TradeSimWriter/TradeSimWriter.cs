@@ -16,17 +16,15 @@ namespace AlphaS.DataAnalyzer
         }
         public TradeSimWriter(string basefolder) { setBaseFolder(basefolder); }
 
-        public void write(string toWrite)
+        public void write(string toWrite, string fileName = "", bool append = false)
         {
-            var filename = DateTime.Now.ToString("yyyyMMdd_HHmm") + ".txt";
+            var filename = fileName == "" ? "" : (fileName + "_") + (append ? "" : DateTime.Now.ToString("yyyyMMdd_HHmm") + ".txt");
             if (!Directory.Exists(_baseFolder)) Directory.CreateDirectory(_baseFolder);
             var filepath = _baseFolder + "\\" + filename;
-            using (var sw = new StreamWriter(filepath))
+            using (var sw = new StreamWriter(filepath, append))
             {
                 sw.Write(toWrite);
             }
         }
-
-
     }
 }

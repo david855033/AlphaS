@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AlphaS.CoreNS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,22 +34,20 @@ namespace AlphaS.DataAnalyzer
 
         public void endSimulation(DateTime currentDate)
         {
+            int traderCount = 0;
+            string summaryFileName = "summary" + "_" + DateTime.Now.ToString("yyyyMMdd_HHmm")+".txt";
+            Core.tradeSimWriter.write(TradingProtocal.toTitle() + "\t" + Trader.getTradeSummaryCols() + "\r\n", summaryFileName, true);
             foreach (var trader in traders)
             {
                 trader.endSimulation(currentDate);
+                Core.tradeSimWriter.write(trader.getResult(), $"trader{++traderCount}", false);
+                Core.tradeSimWriter.write(trader.tradeProtocal.ToString() + "\t" + trader.getShortResult() + "\r\n", summaryFileName, true);
+
             }
+
         }
 
-        public string getTradeResult()
-        {
-            string result = "";
-            foreach (var trader in traders)
-            {
-                result += (trader.getResult()) + "\r\n";
-            }
-            return result;
-        }
 
-       
+
     }
 }
