@@ -72,9 +72,13 @@ namespace AlphaS.DataAnalyzer
                     currentStockPositions.Add(newStockPosition);
                     action.excuteMessage = $"success to buy for ${actualBuyPrice.round(2)}";
                 }
-                else
+                else if (matchStock != null)
                 {
                     action.excuteMessage = $"fail to buy, N_low is ${matchStock.N_low}";
+                }
+                else
+                {
+                    action.excuteMessage = $"fail to buy, stock ID not found";
                 }
                 actionHistory.Add(action);
                 actionList.Remove(action);
@@ -218,7 +222,7 @@ namespace AlphaS.DataAnalyzer
             for (int i = 0; i < tradeProtocal.valueScoreWeight.Length; i++)
             {
                 sum += StockDaily.valueScore[i] * tradeProtocal.valueScoreWeight[i];
-                sum += StockDaily.rankScore[i] * tradeProtocal.rankScoreWeight[i];
+                sum += StockDaily.rankScore[i] * tradeProtocal.rankScoreWeight[i] / 100 - 0.25m;
                 sumWeight += tradeProtocal.valueScoreWeight[i];
                 sumWeight += tradeProtocal.rankScoreWeight[i];
             }
@@ -281,7 +285,7 @@ namespace AlphaS.DataAnalyzer
         private string getTradeSummary()
         {
             int totalDays = lastDate.Subtract(firstDate).Days;
-            string result ="";
+            string result = "";
 
             int tradeCount = dealedTradeList.Count;
 
@@ -294,7 +298,8 @@ namespace AlphaS.DataAnalyzer
             {
                 emptyRate += currentMoneyHistory[currentDate] / (currentMoneyHistory[currentDate] + currentStockValueHistory[currentDate]);
             }
-            emptyRate = (emptyRate / resultDateList.Count).round(4);
+            if (resultDateList.Count > 0)
+                emptyRate = (emptyRate / resultDateList.Count).round(4);
 
             decimal averageHoldDay = 0;
             decimal averageProfitPerTrade = 1;
@@ -303,9 +308,11 @@ namespace AlphaS.DataAnalyzer
                 averageProfitPerTrade *= trade.profitRatio;
                 averageHoldDay += trade.totalDays;
             }
-            averageProfitPerTrade = Math.Exp(Math.Log(averageProfitPerTrade.getDoubleFromDecimal()) / dealedTradeList.Count()).getDecimalFromDouble().round(4);
-            averageHoldDay = (averageHoldDay / dealedTradeList.Count).round(1);
-
+            if (dealedTradeList.Count > 0)
+            {
+                averageProfitPerTrade = Math.Exp(Math.Log(averageProfitPerTrade.getDoubleFromDecimal()) / dealedTradeList.Count()).getDecimalFromDouble().round(4);
+                averageHoldDay = (averageHoldDay / dealedTradeList.Count).round(1);
+            }
             result += tradeCount + "\t" + profit + "\t" + profitPerYear + "\t" + emptyRate + "\t" + averageProfitPerTrade + "\t" + averageHoldDay + "\r\n";
 
             return result;

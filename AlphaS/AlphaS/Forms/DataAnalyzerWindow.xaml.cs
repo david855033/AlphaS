@@ -354,38 +354,42 @@ namespace AlphaS.Forms
 
         private void TradeSimulation(object sender, RoutedEventArgs e)
         {
-            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2014-01-01".getDateTimeFromFileName());
+            var dateList = Core.dailyChartDataManager.getExistedDate().FindAll(x => x.Date >= "2007-01-01".getDateTimeFromFileName());
             dateList.Sort();
             TradeSimulator tradeSimulator = new TradeSimulator();
-            tradeSimulator.addTradingProtocals(generateTradProtocals());
+            var protocals = generateTradProtocals();
+            tradeSimulator.addTradingProtocals(protocals);
             tradeSimulator.initializedTradeSim();
             foreach (var currentDate in dateList)
             {
                 tradeSimulator.goNextDay(currentDate, Core.dailyChartDataManager.getDailyChart(currentDate));
+                viewModel.display = "trade simulating: " + currentDate.getFileNameFromDateTime();
+                refreshText();
             }
             tradeSimulator.endSimulation(dateList.Last());
-
+            viewModel.display = $"done!, total {protocals.Count} protocals";
+            refreshText();
         }
 
         private List<TradingProtocal> generateTradProtocals()
         {
             List<TradingProtocal> result = new List<TradingProtocal>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 15; i++)
             {
-                for (int j = 0; j < 20; j++)
+                for (int j = 0; j < 30; j++)
                 {
                     result.Add(new TradingProtocal()
                     {
-                        valueScoreWeight = new decimal[] { 1m, 1m },
-                        rankScoreWeight = new decimal[] { 1m, 1m },
-                        divideParts = 10,
-                        buyScoreThreshold = 0.4m,
-                        sellScoreThreshold = 0.1m + j * 0.02m,
-                        sellScoreThresholdDay = i,
+                        valueScoreWeight = new decimal[] { 1m, 2m },
+                        rankScoreWeight = new decimal[] { 0.5m, 0.5m },
+                        divideParts = 20,
+                        buyScoreThreshold = 0.3m,
+                        sellScoreThreshold = -0.08m,
+                        sellScoreThresholdDay = 3,
                         sellRankThreshold = 0,
-                        buyPriceFromClose = 1,
-                        sellPriceFromClose = 1
+                        buyPriceFromClose = 0.98m + i * 0.005m,
+                        sellPriceFromClose = 0.90m + j * 0.005m
                     });
                 }
             }

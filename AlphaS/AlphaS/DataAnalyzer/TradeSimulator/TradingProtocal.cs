@@ -37,7 +37,7 @@ namespace AlphaS.DataAnalyzer
             result += buyScoreThreshold + "\t";
 
             result += sellScoreThreshold + "\t";
-            result += sellScoreThreshold + "\t";
+            result += sellScoreThresholdDay + "\t";
             result += sellRankThreshold + "\t";
 
             result += buyPriceFromClose + "\t";
@@ -60,10 +60,10 @@ namespace AlphaS.DataAnalyzer
             }
             result += "divideParts" + "\t";
 
-            result += "scoreThreshold" + "\t";
+            result += "buyScoreThreshold" + "\t";
 
             result += "sellScoreThreshold" + "\t";
-            result += "sellScoreThreshold" + "\t";
+            result += "sellScoreThresholdDay" + "\t";
             result += "sellRankThreshold" + "\t";
 
             result += "buyPriceFromClose" + "\t";

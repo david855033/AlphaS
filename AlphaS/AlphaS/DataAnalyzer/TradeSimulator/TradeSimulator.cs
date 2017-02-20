@@ -35,13 +35,13 @@ namespace AlphaS.DataAnalyzer
         public void endSimulation(DateTime currentDate)
         {
             int traderCount = 0;
-            string summaryFileName = "summary" + "_" + DateTime.Now.ToString("yyyyMMdd_HHmm")+".txt";
-            Core.tradeSimWriter.write(TradingProtocal.toTitle() + "\t" + Trader.getTradeSummaryCols() + "\r\n", summaryFileName, true);
+            string summaryFileName = "summary" + "_" + DateTime.Now.ToString("yyyyMMdd_HHmm");
+            Core.tradeSimWriter.write("No.\t" + TradingProtocal.toTitle() + "\t" + Trader.getTradeSummaryCols(), summaryFileName, true);
             foreach (var trader in traders)
             {
                 trader.endSimulation(currentDate);
                 Core.tradeSimWriter.write(trader.getResult(), $"trader{++traderCount}", false);
-                Core.tradeSimWriter.write(trader.tradeProtocal.ToString() + "\t" + trader.getShortResult() + "\r\n", summaryFileName, true);
+                Core.tradeSimWriter.write(traderCount +"\t"+ trader.tradeProtocal.ToString() + "\t" + trader.getShortResult(), summaryFileName, true);
 
             }
 

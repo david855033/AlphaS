@@ -18,7 +18,7 @@ namespace AlphaS.DataAnalyzer
 
         public void write(string toWrite, string fileName = "", bool append = false)
         {
-            var filename = fileName == "" ? "" : (fileName + "_") + (append ? "" : DateTime.Now.ToString("yyyyMMdd_HHmm") + ".txt");
+            var filename = fileName == "" ? "" : (fileName + "_") + (append ? "" : DateTime.Now.ToString("yyyyMMdd_HHmm")) + ".txt";
             if (!Directory.Exists(_baseFolder)) Directory.CreateDirectory(_baseFolder);
             var filepath = _baseFolder + "\\" + filename;
             using (var sw = new StreamWriter(filepath, append))
