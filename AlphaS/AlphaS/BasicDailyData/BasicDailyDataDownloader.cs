@@ -450,7 +450,7 @@ namespace AlphaS.BasicDailyData
 
             double elapsedTime = DateTime.Now.Subtract(missionStartTime).TotalSeconds.round(1);
             double estimatedTime = (elapsedTime * (100 - percentage) / percentage).round(1);
-            viewModel.missionList += $"elapsed time: {elapsedTime.getElaplsedTime()}, estimate time left: {estimatedTime.getElaplsedTime()}\r\n";
+            viewModel.missionList += $"elapsed time: {elapsedTime.getTimeString()}, estimate time left: {estimatedTime.getTimeString()}\r\n";
 
             for (int i = 0; i < 20 && i < missionList.Count; i++)
             {

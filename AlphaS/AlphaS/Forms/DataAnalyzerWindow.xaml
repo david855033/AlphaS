@@ -21,6 +21,7 @@
             <Button Click="GetStockScore">GetStockScore</Button>
             <Label>Daily Report Function</Label>
             <Button Click="MakeDailyChart">Make Daily Chart</Button>
+            <Button Click="MakeAdvice">MakeAdvice</Button>
             <Label>Future Price Function</Label>
             <Button Click="GetFulturePrice">GetFuturePrice</Button>
             <Button Click="GetFulturePriceRank">GetFuturePriceRank</Button>

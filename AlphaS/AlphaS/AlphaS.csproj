@@ -90,6 +90,9 @@
     <Compile Include="BasicDailyData\BasicDailyDataViewModel.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataManager.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataMissionListGenerator.cs" />
+    <Compile Include="DataAnalyzer\AdviceChartManager\AdviceChartManager.cs" />
+    <Compile Include="DataAnalyzer\AdviceChartManager\AdviceChartInformation.cs" />
+    <Compile Include="DataAnalyzer\AdviceChartManager\IAdviceChartManager.cs" />
     <Compile Include="DataAnalyzer\DailyChart\DailyChartDataManager.cs" />
     <Compile Include="DataAnalyzer\DailyChart\DailyChartInformation.cs" />
     <Compile Include="DataAnalyzer\DailyChart\IDailyChartDataManager.cs" />

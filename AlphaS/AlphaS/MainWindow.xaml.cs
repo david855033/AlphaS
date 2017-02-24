@@ -21,7 +21,7 @@ namespace AlphaS
     /// </summary>
     public partial class MainWindow : Window
     {
-        Dictionary<string,Window> windowList = new Dictionary<string, Window> ();
+        public Dictionary<string,Window> windowList = new Dictionary<string, Window> ();
 
         public MainWindow()
         {

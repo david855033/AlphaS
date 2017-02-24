@@ -65,7 +65,7 @@ namespace AlphaS.Forms
             initializeDownloadMission();
         }
 
-        private void initializeDownloadMission()
+        public void initializeDownloadMission()
         {
             IBasicDailyDataDownloader basicDailyDataDownloader = new BasicDailyDataDownloader();
             basicDailyDataDownloader.setWebBrowser(webBrowser);

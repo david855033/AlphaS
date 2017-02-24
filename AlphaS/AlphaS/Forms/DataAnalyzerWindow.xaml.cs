@@ -299,7 +299,10 @@ namespace AlphaS.Forms
             var dateList = basicData0050.Select(x => x.date).ToList();
             var existedDateList = Core.dailyChartDataManager.getExistedDate();
             existedDateList.Sort();
-            var toCalculateDateList = from q in dateList where existedDateList.BinarySearch(q) < 0 select q;
+            var toCalculateDateList = from q in dateList
+                                      where
+                   existedDateList.BinarySearch(q) < 0
+                                      select q;
 
             int count = 0,
                 allCount = dateList.Count(),
@@ -370,14 +373,13 @@ namespace AlphaS.Forms
             viewModel.display = $"done!, total {protocals.Count} protocals";
             refreshText();
         }
-
         private List<TradingProtocal> generateTradProtocals()
         {
             List<TradingProtocal> result = new List<TradingProtocal>();
 
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 1; i++)
             {
-                for (int j = 0; j < 30; j++)
+                for (int j = 0; j < 1; j++)
                 {
                     result.Add(new TradingProtocal()
                     {
@@ -388,8 +390,8 @@ namespace AlphaS.Forms
                         sellScoreThreshold = -0.08m,
                         sellScoreThresholdDay = 3,
                         sellRankThreshold = 0,
-                        buyPriceFromClose = 0.98m + i * 0.005m,
-                        sellPriceFromClose = 0.90m + j * 0.005m
+                        buyPriceFromClose = 1.01m,
+                        sellPriceFromClose = 0.90m
                     });
                 }
             }
@@ -397,17 +399,101 @@ namespace AlphaS.Forms
             return result;
         }
 
-        private void GroupOrder(object sender, RoutedEventArgs e)
+        private void MakeAdvice(object sender, RoutedEventArgs e)
         {
-            UpdateDiv(sender, e);
-            CalculateParameter(sender, e);
-            GetFulturePrice(sender, e);
-            GetFulturePriceRank(sender, e);
-            AppendParameterFuturePriceTable(sender, e);
-            CalculateParameterFuturePriceTable(sender, e);
-            GetStockScore(sender, e);
-            MakeDailyChart(sender, e);
+            viewModel.display = "";
+
+            var existedDailyChartDateList = Core.dailyChartDataManager.getExistedDate();
+            if (existedDailyChartDateList.Count < 3) { viewModel.display = "no data to calculate."; return; }
+            existedDailyChartDateList.Sort();
+
+            var existedAdviceChartList = Core.adviceChartManager.getExistedDate();
+            existedAdviceChartList.Sort();
+
+            var toCalculateIndexList = (from q in existedDailyChartDateList
+                                        where !existedAdviceChartList.Contains(q)
+                                        orderby q
+                                        select existedDailyChartDateList.IndexOf(q)).ToList();
+
+            int allCount = existedDailyChartDateList.Count(),
+                existedCount = existedAdviceChartList.Count(),
+                toCalculateCount = toCalculateIndexList.Count(); ;
+
+            var dailyChartHolder = new Dictionary<DateTime, List<DailyChartInformation>>();
+            var stockList = Core.stockListManager.getStockList().ToList();
+
+            foreach (var index in toCalculateIndexList)
+            {
+                if (index < AdviceChartInformation.SELL_SCORE_DAY) continue;
+                var thisdate = existedDailyChartDateList[index];
+                viewModel.display = $"calculating: {thisdate.getFileNameFromDateTime()}" + "\r\n" + viewModel.display;
+                refreshText();
+                var thisDailyChart = Core.dailyChartDataManager.getDailyChart(thisdate);
+                dailyChartHolder.Add(thisdate, thisDailyChart);
+
+                var newAdviceChart = new List<AdviceChartInformation>();
+                foreach (var thisRow in thisDailyChart)
+                {
+                    var newAdvice = new AdviceChartInformation(thisRow);
+                    if (newAdvice.weightedScore >= AdviceChartInformation.BUY_SCORE &&
+                        !newAdvice.isLowVolume &&
+                        !newAdvice.recentEmpty)
+                    {
+                        newAdvice.suggestAction = "buy";
+                    }
+                    else if (newAdvice.weightedScore < AdviceChartInformation.SELL_SCORE)
+                    {
+                        bool isBelowThresholdLongEnough = true;
+
+                        for (int i = 1; i < AdviceChartInformation.SELL_SCORE_DAY; i++)
+                        {
+                            var dateToCheck = existedDailyChartDateList[index - i];
+                            if (!dailyChartHolder.ContainsKey(dateToCheck))
+                            {
+                                dailyChartHolder.Add(dateToCheck, Core.dailyChartDataManager.getDailyChart(dateToCheck));
+                            }
+                            var dailyChartToCheck = dailyChartHolder[dateToCheck];
+                            var theRow = dailyChartToCheck.Find(x => x.stockID == newAdvice.stockID);
+                            if (theRow != null && new AdviceChartInformation(theRow).weightedScore > AdviceChartInformation.SELL_SCORE)
+                            {
+                                isBelowThresholdLongEnough = false;
+                            }
+                        }
+
+                        if (isBelowThresholdLongEnough)
+                        {
+                            newAdvice.suggestAction = "sell";
+                        }
+                    }
+
+                    newAdvice.stockName = stockList.Find(x => x.ID == newAdvice.stockID).name;
+                    newAdviceChart.Add(newAdvice);
+                }
+
+                Core.adviceChartManager.saveDailyChart(thisdate, newAdviceChart);
+            }
+
+            viewModel.display = $"done!!" + "\r\n" + viewModel.display;
+            refreshText();
         }
 
+        private void GroupOrder(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            mainWindow.windowList["BasicDailyDataWindow"].Show();
+            (mainWindow.windowList["BasicDailyDataWindow"] as BasicDailyDataWindow).initializeDownloadMission();
+            mainWindow.windowList["BasicDailyDataWindow"].Hide();
+            this.Show();
+            this.Focus();
+            UpdateDiv(sender, e);
+            CalculateParameter(sender, e);
+            //GetFulturePrice(sender, e);
+            //GetFulturePriceRank(sender, e);
+            //AppendParameterFuturePriceTable(sender, e);
+            //CalculateParameterFuturePriceTable(sender, e);
+            GetStockScore(sender, e);
+            MakeDailyChart(sender, e);
+            MakeAdvice(sender, e);
+        }
     }
 }

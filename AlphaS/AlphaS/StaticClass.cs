@@ -110,7 +110,7 @@ namespace AlphaS
         }
 
         public static DateTime getDateTimeFromFileName(this string input)
-        {             
+        {
             return DateTime.ParseExact(input, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
         public static string getFileNameFromDateTime(this DateTime input)
@@ -145,7 +145,7 @@ namespace AlphaS
             return input.Substring(0, input.LastIndexOf('\\'));
         }
 
-        public static string getElaplsedTime(this double input)
+        public static string getTimeString(this double input)
         {
             if (input < 60)
             {
@@ -153,11 +153,11 @@ namespace AlphaS
             }
             else if (input < 60 * 60)
             {
-                return $"{(input - input % 60) / 60}分{(input % 60).round(0)}秒";
+                return $"{Math.Floor(input / 60)}分{(input % 60).round(0)}秒";
             }
             else
             {
-                return $"{(input - input % 3600) / 3600}時{(input - input % 60) % 60}分{(input % 60).round(0)}秒";
+                return $"{Math.Floor(input / 3600)}時{Math.Floor((input % 3600) / 60)}分{(input % 60).round(0)}秒";
             }
         }
 
