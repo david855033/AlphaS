@@ -79,7 +79,7 @@ namespace AlphaS.Forms
                  $"[CalculateParameter ID = {ID}]  ({++count}/{all})\r\n";
                 dataAnalyzer.setBasicDailyData(Core.basicDailyDataManager.getBasicDailyData(ID));
                 dataAnalyzer.setAnalyzedData(Core.analyzedDataManager.getAnalyzedData(ID));
-
+                dataAnalyzer.setID(ID);
                 dataAnalyzer.calculateParameter();
                 output += dataAnalyzer.getDisplay();
 
@@ -426,8 +426,7 @@ namespace AlphaS.Forms
             {
                 if (index < AdviceChartInformation.SELL_SCORE_DAY) continue;
                 var thisdate = existedDailyChartDateList[index];
-                viewModel.display = $"calculating: {thisdate.getFileNameFromDateTime()}" + "\r\n" + viewModel.display;
-                refreshText();
+               
                 var thisDailyChart = Core.dailyChartDataManager.getDailyChart(thisdate);
                 dailyChartHolder.Add(thisdate, thisDailyChart);
 
@@ -471,6 +470,8 @@ namespace AlphaS.Forms
                 }
 
                 Core.adviceChartManager.saveDailyChart(thisdate, newAdviceChart);
+                viewModel.display = $"calculated: {thisdate.getFileNameFromDateTime()}," + $" {newAdviceChart.Count} stocks" + "\r\n" + viewModel.display;
+                refreshText();
             }
 
             viewModel.display = $"done!!" + "\r\n" + viewModel.display;

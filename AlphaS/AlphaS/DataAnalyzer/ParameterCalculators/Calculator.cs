@@ -120,7 +120,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
                 AnalyzedData[i].parameters[parameterIndexOfChange] =
                    ((AnalyzedData[i].N_close - AnalyzedData[i - 1].N_close) /
                     AnalyzedData[i - 1].N_close * 100).round(2);
-
+                
                 AnalyzedData[i].parameters[parameterIndexOfChangeAvg] =
                     ((AnalyzedData[i].N_avg - AnalyzedData[i - 1].N_avg) /
                     AnalyzedData[i - 1].N_avg * 100).round(2);

@@ -12,6 +12,9 @@ namespace AlphaS.DataAnalyzer
     {
         public static readonly decimal MIN_VOLUME_THRESHOLD = 5000; //unit: k NTD -> 2500w
         private string stockType;
+        private string ID;
+        public  void setID(string ID)
+        { this.ID= ID; }
         public void setStockType(string type)
         {
             stockType = type;
@@ -215,7 +218,10 @@ namespace AlphaS.DataAnalyzer
             calculators.Add(new VolumePerOrderCalculator(analyzedData, addDisplay));
             calculators.Add(new KDJCalculator(analyzedData, addDisplay));
             calculators.Add(new RSICalculator(analyzedData, addDisplay));
-            foreach (var c in calculators) c.calculate();
+            foreach (var c in calculators) {
+                c.ID = this.ID;
+                c.calculate();
+            }
         }
 
 

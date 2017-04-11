@@ -44,7 +44,8 @@ namespace AlphaS.CoreNS
         static readonly string DAILY_CHART_FOLDER = DEFAULT_FOLDER + "\\" + "DailyChart";
         public static readonly IDailyChartDataManager dailyChartDataManager = new DailyChartDataManager(DAILY_CHART_FOLDER);
 
-        static readonly string ADVICE_CHART_FOLDER = DEFAULT_FOLDER + "\\" + "Advices";
+        //static readonly string ADVICE_CHART_FOLDER = DEFAULT_FOLDER + "\\" + "Advices";
+        static readonly string ADVICE_CHART_FOLDER = @"D:\Google Drive\AlphaS\advice";
         public static readonly IAdviceChartManager adviceChartManager = new AdviceChartManager(ADVICE_CHART_FOLDER);
 
 

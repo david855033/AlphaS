@@ -165,7 +165,7 @@ namespace AlphaS.BasicDailyData
                     break;
                 }
             }
-            Thread.Sleep(200);
+            Thread.Sleep(500);
             query_button.InvokeMember("click");
         }
         private void selectIDandDateThenDoQueryB()
@@ -181,7 +181,7 @@ namespace AlphaS.BasicDailyData
             input_stock_code.Focus();
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
-            Thread.Sleep(200);
+            Thread.Sleep(400);
 
 
             /*

@@ -9,7 +9,7 @@ namespace AlphaS.DataAnalyzer.ParameterCalculators
     abstract class BaseParameterCalculator
     {
         public const int PRE_DATA = 120;
-
+        public string ID;
         public BaseParameterCalculator(List<AnalyzedDataInformation> AnalyzedData, addDisplayDel addDisplay)
         {
             setAnalyzedData(AnalyzedData);

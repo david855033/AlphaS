@@ -9,7 +9,7 @@ namespace AlphaS.DataAnalyzer
     public interface IDataAnalyzer
     {
         void setStockType(string type);
-
+         void setID(string ID);
         void set0050BasicData(List<BasicDailyDataInformation> BasicData0050);
 
         void setBasicDailyData(List<BasicDailyDataInformation> BasicDailyData);
