@@ -193,7 +193,7 @@ namespace AlphaS.BasicDailyData
         }
         private HtmlElement getResultTable(HtmlDocument doc)
         {
-            return doc.GetElementById("st43_result");
+            return doc.GetElementById("st43_result"); ;
         }
 
         private FileStatus getCurrentFileStatus(List<BasicDailyDataInformation> analyzedDataList)
