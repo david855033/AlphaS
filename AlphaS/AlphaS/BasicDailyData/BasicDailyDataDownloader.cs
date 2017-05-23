@@ -56,7 +56,7 @@ namespace AlphaS.BasicDailyData
 
             Thread.Sleep(100);
 
-            webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+            webBrowser.Navigate(@"http://www.tse.com.tw/zh/page/trading/exchange/STOCK_DAY.html");
             currentWebSiteStockType = "A";
             currentMission = null;
 
@@ -70,7 +70,7 @@ namespace AlphaS.BasicDailyData
                     assignMission();
                 }
 
-                bool isRetry = DateTime.Now.Subtract(missionAssignedTime).TotalSeconds > 5;
+                bool isRetry = DateTime.Now.Subtract(missionAssignedTime).TotalSeconds > 4;
                 if (isRetry)
                 {
                     setWebSite(webBrowser, currentMission.type, forceLoad: true);
@@ -115,7 +115,7 @@ namespace AlphaS.BasicDailyData
             {
                 if (type == "A")
                 {
-                    webBrowser.Navigate(@"http://www.twse.com.tw/ch/trading/exchange/STOCK_DAY/STOCK_DAYMAIN.php");
+                    webBrowser.Navigate(@"http://www.tse.com.tw/zh/page/trading/exchange/STOCK_DAY.html");
                 }
                 else if (type == "B")
                 {
@@ -144,29 +144,48 @@ namespace AlphaS.BasicDailyData
         }
         private void selectIDandDateThenDoQueryA()
         {
-            var query_year = webBrowser.Document.GetElementById("query_year");
-            var query_month = webBrowser.Document.GetElementById("query_month");
-            var CO_ID = webBrowser.Document.GetElementById("CO_ID");
-            var query_button = webBrowser.Document.GetElementById("query-button");
+            var form = webBrowser.Document.GetElementById("main-form");
+            var selects = form.Children;
+
+            foreach (HtmlElement s in selects)
+            {
+                if (s.GetAttribute("name") == "yy")
+                {
+                    HtmlElement query_year = s;
+                    foreach (HtmlElement opt in query_year.Children)
+                    {
+                        if (opt.GetAttribute("value") == currentMission.year.ToString())
+                        {
+                            opt.SetAttribute("selected", "selected");
+                            break;
+                        }
+                    }
+                }
+                if (s.GetAttribute("name") == "mm")
+                {
+                    HtmlElement query_month = s;
+                    foreach (HtmlElement opt in query_month.Children)
+                    {
+                        if (opt.GetAttribute("value") == currentMission.month.ToString())
+                        {
+                            opt.SetAttribute("selected", "selected");
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            var CO_ID = webBrowser.Document.GetElementById("stockNo");
+
+
             CO_ID.InnerText = currentMission.ID;
-            foreach (HtmlElement opt in query_year.Children)
-            {
-                if (opt.GetAttribute("value") == currentMission.year.ToString())
-                {
-                    opt.SetAttribute("selected", "selected");
-                    break;
-                }
-            }
-            foreach (HtmlElement opt in query_month.Children)
-            {
-                if (opt.GetAttribute("value") == currentMission.month.ToString())
-                {
-                    opt.SetAttribute("selected", "selected");
-                    break;
-                }
-            }
-            Thread.Sleep(500);
-            query_button.InvokeMember("click");
+           
+          
+            Thread.Sleep(300);
+            CO_ID.Focus();
+            Thread.Sleep(80);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
         }
         private void selectIDandDateThenDoQueryB()
         {
@@ -181,7 +200,7 @@ namespace AlphaS.BasicDailyData
             input_stock_code.Focus();
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
-            Thread.Sleep(400);
+            Thread.Sleep(350);
 
 
             /*
@@ -256,14 +275,15 @@ namespace AlphaS.BasicDailyData
         {
             if (currentWebSiteStockType == "A")
             {
-                HtmlElementCollection tables = doc.GetElementsByTagName("table");
-                foreach (HtmlElement table in tables)
-                {
-                    if (table.InnerHtml.Contains("各日成交資訊"))
-                    {
-                        return table;
-                    }
-                }
+                return doc.GetElementById("report-table");
+                //HtmlElementCollection tables = doc.GetElementsByTagName("report-table");
+                //foreach (HtmlElement table in tables)
+                //{
+                //    if (table.InnerHtml.Contains("成交股數"))
+                //    {
+                //        return table;
+                //    }
+                //}
             }
             else if (currentWebSiteStockType == "B")
             {

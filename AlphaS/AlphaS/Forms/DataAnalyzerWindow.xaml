@@ -34,6 +34,8 @@
             <Button Click="TradeSimulation">Trade Sim</Button>
             <TextBlock FontSize="15" Margin="0,20">組套</TextBlock>
             <Button Click="GroupOrder">AnalyzeData+Parameter+FP+FinalTable</Button>
+            <TextBlock FontSize="15" Margin="0,20">工具</TextBlock>
+            <Button Click="ClearDataBase">清除某月份之後資料</Button>
         </StackPanel>
         <TextBlock x:Name="displayText" Grid.Column="1" Text="{Binding display, IsAsync=True}" Padding="20,0,0,0"/>
     </Grid>

@@ -426,7 +426,7 @@ namespace AlphaS.Forms
             {
                 if (index < AdviceChartInformation.SELL_SCORE_DAY) continue;
                 var thisdate = existedDailyChartDateList[index];
-               
+
                 var thisDailyChart = Core.dailyChartDataManager.getDailyChart(thisdate);
                 dailyChartHolder.Add(thisdate, thisDailyChart);
 
@@ -495,6 +495,54 @@ namespace AlphaS.Forms
             GetStockScore(sender, e);
             MakeDailyChart(sender, e);
             MakeAdvice(sender, e);
+        }
+
+
+
+        private void ClearDataBase(object sender, RoutedEventArgs e)
+        {
+            const string THE_DATE = "2017-04-01";
+            foreach (var s in Core.stockListManager.getStockList().Select(x => x.ID))
+            {
+                Core.analyzedDataManager.saveAnalyzedData(s,
+                    Core.analyzedDataManager.getAnalyzedData(s).FindAll(
+                        x => x.date < THE_DATE.getDateTimeFromString()
+                        )
+                    );
+
+                Core.basicDailyDataManager.saveBasicDailyData(s,
+                   Core.basicDailyDataManager.getBasicDailyData(s).FindAll(
+                       x => x.date < THE_DATE.getDateTimeFromString()
+                       )
+                   );
+
+                Core.basicDailyDataManager.saveFileStatus(s,
+                  Core.basicDailyDataManager.getFileStatus(s).FindAll(
+                      x => x.year.getIntFromString() < THE_DATE.getDateTimeFromString().Year ||
+                        (x.year.getIntFromString() == THE_DATE.getDateTimeFromString().Year &&
+                            x.month.getIntFromString() < THE_DATE.getDateTimeFromString().Month
+                        )
+                      )
+                  );
+
+                Core.scoreDataManager.saveScoreData(s,
+                   Core.scoreDataManager.getScoreData(s).FindAll(
+                       x => x.date < THE_DATE.getDateTimeFromString()
+                       )
+                   );
+
+                var dailyChartList = Directory.EnumerateFiles(Core.dailyChartDataManager.getBaseFolder()).ToList();
+                foreach (var f in dailyChartList.FindAll(x => x.Split('\\').Last().Split('.').First().getDateTimeFromString() >= THE_DATE.getDateTimeFromString()))
+                {
+                    File.Delete(f);
+                }
+
+                var adviceList = Directory.EnumerateFiles(Core.adviceChartManager.getBaseFolder()).ToList();
+                foreach (var f in adviceList.FindAll(x => x.Split('\\').Last().Split('.').First().getDateTimeFromString() >= THE_DATE.getDateTimeFromString()))
+                {
+                    File.Delete(f);
+                }
+            }
         }
     }
 }
