@@ -5,6 +5,8 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System;
 using AlphaS.CoreNS;
+using System.Net;
+using System.IO;
 
 namespace AlphaS.BasicDailyData
 {
@@ -24,6 +26,8 @@ namespace AlphaS.BasicDailyData
         public void setViewModel(BasicDailyDataViewModel viewModel) { this.viewModel = viewModel; }
 
         List<BasicDailyDataMission> missionList;
+        List<BasicDailyDataMission> missionListA;
+        List<BasicDailyDataMission> missionListB;
         public void setMission(List<BasicDailyDataMission> mission)
         {
             this.missionList = mission.ToList();
@@ -51,142 +55,89 @@ namespace AlphaS.BasicDailyData
         public void startMainMissionLoop()
         {
             missionStartTime = DateTime.Now;
-            webBrowser.DocumentCompleted += analyzeHTML;
             viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
+
+            missionListA = missionList.Where(x => x.type == "A").ToList();
+            missionListB = missionList.Where(x => x.type == "B").ToList();
 
             Thread.Sleep(100);
 
-            webBrowser.Navigate(@"http://www.tse.com.tw/zh/page/trading/exchange/STOCK_DAY.html");
+
             currentWebSiteStockType = "A";
             currentMission = null;
 
             DateTime missionAssignedTime = DateTime.Now;
 
-            while (missionList.Count > 0)
+            while (missionListA.Count > 0)
+            {
+                currentMission = missionListA.First();
+                printMissionList();
+                Application.DoEvents();
+                var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
+                var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
+
+                printMissionList();
+                var s = GetCSV(
+                    $"http://www.tse.com.tw/exchangeReport/STOCK_DAY?response=csv&date={currentMission.year}{currentMission.month.ToString("D2")}01&stockNo={currentMission.ID}");
+
+                List<BasicDailyDataInformation> analyzedDataList = analysisDataCSV(s);
+                FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
+
+                if ((currentFileStatus != FileStatus.Null))
+                {
+                    renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);
+                    renewBasicDailyDataList(basicDailyDataList, analyzedDataList);
+                    Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
+                    Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
+                    missionList.Remove(currentMission);
+                    currentMission = null;
+                }
+
+                missionListA.RemoveAt(0);
+                printMissionList();
+            }
+
+            webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
+
+            while (missionListB.Count > 0)
             {
                 Application.DoEvents();
                 if (currentMission == null)
                 {
-                    assignMission();
+                    currentMission = missionListB.First();
+                    printMissionList();
                 }
 
                 bool isRetry = DateTime.Now.Subtract(missionAssignedTime).TotalSeconds > 4;
                 if (isRetry)
                 {
-                    setWebSite(webBrowser, currentMission.type, forceLoad: true);
+                    webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
                     missionAssignedTime = DateTime.Now;
+                    querySend = false;
                 }
 
-                if (!querySend)
+                if (!querySend && webBrowser.ReadyState == WebBrowserReadyState.Complete)
                 {
                     missionAssignedTime = DateTime.Now;
                     querySend = true;
-                    assignMission();
-                    performMission();
-                }
-            }
-            printMissionList();
-        }
-
-        void assignMission()
-        {
-            if (missionList.Count > 0)
-            {
-                if (currentMission == null)
-                {
-                    currentMission = missionList.First();
-                }
-                if ((currentMission.type != currentWebSiteStockType))
-                {
-                    setWebSite(webBrowser, currentMission.type);
-                }
-            }
-            printMissionList();
-        }
-        void performMission()
-        {
-            Thread.Sleep(200);
-            selectIDandDateThenDoQuery(currentWebSiteStockType);
-        }
-
-        private void setWebSite(WebBrowser webBrowser, string type, bool forceLoad = false)
-        {
-            if (forceLoad || currentWebSiteStockType != type)
-            {
-                if (type == "A")
-                {
-                    webBrowser.Navigate(@"http://www.tse.com.tw/zh/page/trading/exchange/STOCK_DAY.html");
-                }
-                else if (type == "B")
-                {
-                    webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
-                }
-                currentWebSiteStockType = type;
-            }
-        }
-
-        private void selectIDandDateThenDoQuery(string currentWebSiteStockType)
-        {
-            try
-            {
-                if (currentWebSiteStockType == "A")
-                {
-                    selectIDandDateThenDoQueryA();
-                }
-                else
-                {
                     selectIDandDateThenDoQueryB();
                 }
             }
-            catch
-            {
-            }
+            printMissionList();
         }
-        private void selectIDandDateThenDoQueryA()
+
+
+        public string GetCSV(string url)
         {
-            var form = webBrowser.Document.GetElementById("main-form");
-            var selects = form.Children;
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
 
-            foreach (HtmlElement s in selects)
-            {
-                if (s.GetAttribute("name") == "yy")
-                {
-                    HtmlElement query_year = s;
-                    foreach (HtmlElement opt in query_year.Children)
-                    {
-                        if (opt.GetAttribute("value") == currentMission.year.ToString())
-                        {
-                            opt.SetAttribute("selected", "selected");
-                            break;
-                        }
-                    }
-                }
-                if (s.GetAttribute("name") == "mm")
-                {
-                    HtmlElement query_month = s;
-                    foreach (HtmlElement opt in query_month.Children)
-                    {
-                        if (opt.GetAttribute("value") == currentMission.month.ToString())
-                        {
-                            opt.SetAttribute("selected", "selected");
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-            var CO_ID = webBrowser.Document.GetElementById("stockNo");
-
-
-            CO_ID.InnerText = currentMission.ID;
-           
-          
-            Thread.Sleep(300);
-            CO_ID.Focus();
-            Thread.Sleep(80);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            StreamReader sr = new StreamReader(resp.GetResponseStream(), System.Text.Encoding.Default);
+            string results = sr.ReadToEnd();
+            sr.Close();
+            return results;
         }
+
         private void selectIDandDateThenDoQueryB()
         {
             changeEnglishTyping();
@@ -200,50 +151,17 @@ namespace AlphaS.BasicDailyData
             input_stock_code.Focus();
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
-            Thread.Sleep(350);
+            Thread.Sleep(500);
 
 
-            /*
-            Thread.Sleep(WAIT_RESP_TIME);
-            sendDels();
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            System.Windows.Forms.SendKeys.SendWait($"{currentMission.ID}");
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            
+            string checkingYM = currentMission.year + currentMission.month.ToString("D2");
+            recordDataInWebBrowser(webBrowser.Document, checkingYM);
 
-            input_date.Focus();
-            Thread.Sleep(WAIT_RESP_TIME);
-            sendDels();
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            System.Windows.Forms.SendKeys.SendWait($"{currentMission.year - 1911}/{currentMission.month}");
-            Thread.Sleep(WAIT_RESP_TIME * 25);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(WAIT_RESP_TIME * 10);
-            input_date.RemoveFocus();
-            */
-
-
-            //****(非使用event呼叫)
-
-            analyzeHTML(this, new WebBrowserDocumentCompletedEventArgs(new Uri("http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw")));
+            querySend = false;
             Thread.Sleep(400);
 
         }
 
-        void analyzeHTML(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            if (missionList.Count == 0)
-            {
-                webBrowser.DocumentCompleted -= analyzeHTML;
-            }
-            else if (currentMission == missionList.First())
-            {
-                string checkingYM = currentMission.year + currentMission.month.ToString("D2");
-                recordDataInWebBrowser(webBrowser.Document, checkingYM);
-            }
-
-            querySend = false;
-        }
 
         int nullcount = 0;
         private string recordDataInWebBrowser(HtmlDocument doc, string checkingYM)
@@ -267,30 +185,17 @@ namespace AlphaS.BasicDailyData
                 Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
                 Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
                 missionList.Remove(currentMission);
+                missionListB.RemoveAt(0);
+                missionList.Remove(currentMission);
                 currentMission = null;
             }
             return resultYM;
         }
         private HtmlElement getResultTable(HtmlDocument doc)
         {
-            if (currentWebSiteStockType == "A")
-            {
-                return doc.GetElementById("report-table");
-                //HtmlElementCollection tables = doc.GetElementsByTagName("report-table");
-                //foreach (HtmlElement table in tables)
-                //{
-                //    if (table.InnerHtml.Contains("成交股數"))
-                //    {
-                //        return table;
-                //    }
-                //}
-            }
-            else if (currentWebSiteStockType == "B")
-            {
-                return doc.GetElementById("st43_result");
-            }
-            return null;
+            return doc.GetElementById("st43_result");
         }
+
         private FileStatus getCurrentFileStatus(List<BasicDailyDataInformation> analyzedDataList)
         {
             FileStatus filestatus;
@@ -346,22 +251,46 @@ namespace AlphaS.BasicDailyData
             }
         }
 
+        private List<BasicDailyDataInformation> analysisDataCSV(string s)
+        {
+            var lines = s.Split('\n');
+            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
+            foreach (var l in lines)
+            {
+                Regex regex = new Regex("([\"'])(?:(?=(\\\\?))\\2.)*?\\1");
+                var matches = regex.Matches(l);
+                string[] row = new string[matches.Count];
+                for (int i = 0; i < matches.Count; i++)
+                {
+                    row[i] = matches[i].Groups[0].Value.Trim('"');
+                }
+                if (row.Length != 9 || row[0] == "日期")
+                {
+                    continue;
+                }
+                var toAdd = new BasicDailyDataInformation()
+                {
+                    date = row[0].getRidOfPostStar().getDateTimeFromStringMK(),
+                    dealedStock = row[1].getDecimalFromString(),
+                    volume = row[2].getDecimalFromString(),
+                    open = row[3].getDecimalFromString(),
+                    high = row[4].getDecimalFromString(),
+                    low = row[5].getDecimalFromString(),
+                    close = row[6].getDecimalFromString(),
+                    change = row[7].getDecimalFromString(),
+                    dealedOrder = row[8].getDecimalFromString()
+                };
+                result.Add(toAdd);
+            }
+            return result;
+        }
+
         List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
             string s = getContentFromtbody(tableInnerHTML);
-            if (currentWebSiteStockType == "A")
-            {
-                List<string> dataByRows = getListByTableRow(s);
-                List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
-                return fillInBasicDailyDataInformation(dataByRowsAndCols);
-            }
-            else if (currentWebSiteStockType == "B")
-            {
-                List<string> dataByRows = getListByTableRow(s);
-                List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
-                return fillInBasicDailyDataInformation(dataByRowsAndCols);
-            }
-            throw new InvalidOperationException();
+            List<string> dataByRows = getListByTableRow(s);
+            List<string[]> dataByRowsAndCols = splitRowContentIntoCols(dataByRows);
+            return fillInBasicDailyDataInformation(dataByRowsAndCols);
         }
         public string getContentFromtbody(string input)
         {
@@ -428,6 +357,9 @@ namespace AlphaS.BasicDailyData
             }
             return result;
         }
+
+
+
 
         private void changeEnglishTyping()
         {
