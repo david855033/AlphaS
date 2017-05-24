@@ -67,7 +67,7 @@ namespace AlphaS.BasicDailyData
             currentMission = null;
 
             DateTime missionAssignedTime = DateTime.Now;
-
+            int nullcount = 0;
             while (missionListA.Count > 0)
             {
                 currentMission = missionListA.First();
@@ -82,18 +82,21 @@ namespace AlphaS.BasicDailyData
 
                 List<BasicDailyDataInformation> analyzedDataList = analysisDataCSV(s);
                 FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
-
-                if ((currentFileStatus != FileStatus.Null))
+                
+                if ((currentFileStatus != FileStatus.Null) || nullcount > 3)
                 {
                     renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);
                     renewBasicDailyDataList(basicDailyDataList, analyzedDataList);
                     Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
                     Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
                     missionList.Remove(currentMission);
+                    missionListA.RemoveAt(0);
                     currentMission = null;
+                    nullcount = 0;
                 }
-
-                missionListA.RemoveAt(0);
+                else {
+                    nullcount++;
+                }
                 printMissionList();
             }
 
