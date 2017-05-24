@@ -146,7 +146,7 @@ namespace AlphaS.BasicDailyData
 
             input_date.InnerText = $"{currentMission.year - 1911}/{currentMission.month}";
             input_stock_code.InnerText = currentMission.ID;
-            Thread.Sleep(250);
+            Thread.Sleep(100);
 
             input_stock_code.Focus();
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
@@ -159,7 +159,7 @@ namespace AlphaS.BasicDailyData
             recordDataInWebBrowser(webBrowser.Document, checkingYM,checkingID);
 
             querySend = false;
-            Thread.Sleep(300);
+            Thread.Sleep(100);
 
         }
 
