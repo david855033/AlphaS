@@ -146,37 +146,40 @@ namespace AlphaS.BasicDailyData
 
             input_date.InnerText = $"{currentMission.year - 1911}/{currentMission.month}";
             input_stock_code.InnerText = currentMission.ID;
-
+            Thread.Sleep(250);
 
             input_stock_code.Focus();
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
-            Thread.Sleep(500);
+            Thread.Sleep(300);
 
 
             string checkingYM = currentMission.year + currentMission.month.ToString("D2");
-            recordDataInWebBrowser(webBrowser.Document, checkingYM);
+            string checkingID = currentMission.ID;
+            recordDataInWebBrowser(webBrowser.Document, checkingYM,checkingID);
 
             querySend = false;
-            Thread.Sleep(400);
+            Thread.Sleep(300);
 
         }
 
 
         int nullcount = 0;
-        private string recordDataInWebBrowser(HtmlDocument doc, string checkingYM)
+        private string recordDataInWebBrowser(HtmlDocument doc, string checkingYM,string checkingID)
         {
             string resultYM = "";
             viewModel.acquiredData = BasicDailyDataInformation.ToTitle() + "\r\n";
             var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
             var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
+            HtmlElement IDHeader = doc.GetElementById("stk_no");
 
             HtmlElement resultTable = getResultTable(doc);
             if (resultTable == null) return "";
             List<BasicDailyDataInformation> analyzedDataList = analysisDataTable(resultTable.InnerHtml);
             FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
             if ((currentFileStatus != FileStatus.Null &&
-                checkingYM == analyzedDataList.First().date.ToString("yyyyMM"))
+                checkingYM == analyzedDataList.First().date.ToString("yyyyMM") &&
+                IDHeader.InnerHtml.Contains(checkingID))
                 || currentFileStatus == FileStatus.Null && ++nullcount >= 4)
             {
                 nullcount = 0;
