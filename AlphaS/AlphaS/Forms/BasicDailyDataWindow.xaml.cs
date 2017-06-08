@@ -79,10 +79,9 @@ namespace AlphaS.Forms
             var missionList = missionListGenerator.getMissionList(viewModel.IsReadAll);
             if (missionList.Count != 0) basicDailyDataDownloader.setMission(missionList);
 
-            while (basicDailyDataDownloader.getMissionCount() > 0)
-            {
-                basicDailyDataDownloader.startMainMissionLoop();
-            }
+
+            basicDailyDataDownloader.startMainMission();
+
 
         }
 

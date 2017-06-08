@@ -10,7 +10,7 @@ namespace AlphaS.BasicDailyData
     {
         void setMission(List<BasicDailyDataMission> mission);
         int getMissionCount();
-        void startMainMissionLoop();
+        void startMainMission();
         List<BasicDailyDataInformation> getResult();
         void setViewModel(BasicDailyDataViewModel viewModel);
         void setWebBrowser(System.Windows.Forms.WebBrowser webBrowser);

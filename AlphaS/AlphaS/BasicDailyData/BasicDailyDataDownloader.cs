@@ -7,6 +7,7 @@ using System;
 using AlphaS.CoreNS;
 using System.Net;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AlphaS.BasicDailyData
 {
@@ -25,13 +26,10 @@ namespace AlphaS.BasicDailyData
         private BasicDailyDataViewModel viewModel;
         public void setViewModel(BasicDailyDataViewModel viewModel) { this.viewModel = viewModel; }
 
-        List<BasicDailyDataMission> missionList;
-        List<BasicDailyDataMission> missionListA;
-        List<BasicDailyDataMission> missionListB;
+        List<BasicDailyDataMission> missionList = new List<BasicDailyDataMission>();
         public void setMission(List<BasicDailyDataMission> mission)
         {
             this.missionList = mission.ToList();
-            totalMission = mission.Count();
         }
         public int getMissionCount()
         {
@@ -46,89 +44,46 @@ namespace AlphaS.BasicDailyData
 
         public bool webBrowserWorking = false;
 
-        bool querySend = false;
 
-        string currentWebSiteStockType = "";
-        BasicDailyDataMission currentMission;
         public DateTime missionStartTime;
 
-        public void startMainMissionLoop()
+        BasicDailyDataMission currentMission;
+
+        public void startMainMission()
         {
             missionStartTime = DateTime.Now;
             viewModel.acquiredData = BasicDailyDataInformation.ToTitle();
 
-            missionListA = missionList.Where(x => x.type == "A").ToList();
-            missionListB = missionList.Where(x => x.type == "B").ToList();
-
-            Thread.Sleep(100);
-
-
-            currentWebSiteStockType = "A";
-            currentMission = null;
-
-            DateTime missionAssignedTime = DateTime.Now;
-            int nullcount = 0;
-            while (missionListA.Count > 0)
+            for (int i = 0; i < missionList.Count(); i++)
             {
-                currentMission = missionListA.First();
-                printMissionList();
+                printMissionList(i);
                 Application.DoEvents();
+                currentMission = missionList[i];
                 var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
                 var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
+                var analyzedDataList = new List<BasicDailyDataInformation>();
+                if (currentMission.type == "A")
+                {
+                    var s = GetCSV($"http://www.tse.com.tw/exchangeReport/STOCK_DAY?response=csv&date={currentMission.year}{currentMission.month.ToString("D2")}01&stockNo={currentMission.ID}");
+                    analyzedDataList = analysisDataCSV(s);
+                }
+                else if (currentMission.type == "B")
+                {
 
-                printMissionList();
-                var s = GetCSV(
-                    $"http://www.tse.com.tw/exchangeReport/STOCK_DAY?response=csv&date={currentMission.year}{currentMission.month.ToString("D2")}01&stockNo={currentMission.ID}");
-
-                List<BasicDailyDataInformation> analyzedDataList = analysisDataCSV(s);
+                    var s = GetJSON(
+                     $"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43_result.php?l=zh-tw&d={currentMission.year - 1911}/{currentMission.month.ToString("D2")}&stkno={currentMission.ID}"
+                     );
+                    var jsonResult = s.ParseJSON();
+                    analyzedDataList = analysisDataJSON(jsonResult["aaData"].ParseTable());
+                }
                 FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
-                
-                if ((currentFileStatus != FileStatus.Null) || nullcount > 3)
-                {
-                    renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);
-                    renewBasicDailyDataList(basicDailyDataList, analyzedDataList);
-                    Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
-                    Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
-                    missionList.Remove(currentMission);
-                    missionListA.RemoveAt(0);
-                    currentMission = null;
-                    nullcount = 0;
-                }
-                else {
-                    nullcount++;
-                }
-                printMissionList();
+                renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);
+                renewBasicDailyDataList(basicDailyDataList, analyzedDataList);
+                Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
+                Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
             }
-
-            webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
-
-            while (missionListB.Count > 0)
-            {
-                Application.DoEvents();
-                if (currentMission == null)
-                {
-                    currentMission = missionListB.First();
-                    printMissionList();
-                }
-
-                bool isRetry = DateTime.Now.Subtract(missionAssignedTime).TotalSeconds > 4;
-                if (isRetry)
-                {
-                    webBrowser.Navigate(@"http://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info/st43.php?l=zh-tw");
-                    missionAssignedTime = DateTime.Now;
-                    querySend = false;
-                }
-
-                if (!querySend && webBrowser.ReadyState == WebBrowserReadyState.Complete)
-                {
-                    missionAssignedTime = DateTime.Now;
-                    querySend = true;
-                    selectIDandDateThenDoQueryB();
-                }
-            }
-            printMissionList();
+            printMissionList(missionList.Count);
         }
-
 
         public string GetCSV(string url)
         {
@@ -141,62 +96,17 @@ namespace AlphaS.BasicDailyData
             return results;
         }
 
-        private void selectIDandDateThenDoQueryB()
+        public string GetJSON(string url)
         {
-            changeEnglishTyping();
-            var input_date = webBrowser.Document.GetElementById("input_date");
-            var input_stock_code = webBrowser.Document.GetElementById("input_stock_code");
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
 
-            input_date.InnerText = $"{currentMission.year - 1911}/{currentMission.month}";
-            input_stock_code.InnerText = currentMission.ID;
-            Thread.Sleep(100);
-
-            input_stock_code.Focus();
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-
-            Thread.Sleep(300);
-
-
-            string checkingYM = currentMission.year + currentMission.month.ToString("D2");
-            string checkingID = currentMission.ID;
-            recordDataInWebBrowser(webBrowser.Document, checkingYM,checkingID);
-
-            querySend = false;
-            Thread.Sleep(100);
-
+            StreamReader sr = new StreamReader(resp.GetResponseStream(), System.Text.Encoding.Default);
+            string results = sr.ReadToEnd();
+            sr.Close();
+            return results;
         }
 
-
-        int nullcount = 0;
-        private string recordDataInWebBrowser(HtmlDocument doc, string checkingYM,string checkingID)
-        {
-            string resultYM = "";
-            viewModel.acquiredData = BasicDailyDataInformation.ToTitle() + "\r\n";
-            var basicDailyDataList = Core.basicDailyDataManager.getBasicDailyData(currentMission.ID);
-            var fileStatusList = Core.basicDailyDataManager.getFileStatus(currentMission.ID);
-            HtmlElement IDHeader = doc.GetElementById("stk_no");
-
-            HtmlElement resultTable = getResultTable(doc);
-            if (resultTable == null) return "";
-            List<BasicDailyDataInformation> analyzedDataList = analysisDataTable(resultTable.InnerHtml);
-            FileStatus currentFileStatus = getCurrentFileStatus(analyzedDataList);
-            if ((currentFileStatus != FileStatus.Null &&
-                checkingYM == analyzedDataList.First().date.ToString("yyyyMM") &&
-                IDHeader.InnerHtml.Contains(checkingID))
-                || currentFileStatus == FileStatus.Null && ++nullcount >= 4)
-            {
-                nullcount = 0;
-                renewFileStatus(fileStatusList, currentFileStatus, analyzedDataList.Count);
-                renewBasicDailyDataList(basicDailyDataList, analyzedDataList);
-                Core.basicDailyDataManager.saveBasicDailyData(currentMission.ID, basicDailyDataList);
-                Core.basicDailyDataManager.saveFileStatus(currentMission.ID, fileStatusList);
-                missionList.Remove(currentMission);
-                missionListB.RemoveAt(0);
-                missionList.Remove(currentMission);
-                currentMission = null;
-            }
-            return resultYM;
-        }
         private HtmlElement getResultTable(HtmlDocument doc)
         {
             return doc.GetElementById("st43_result"); ;
@@ -242,6 +152,7 @@ namespace AlphaS.BasicDailyData
         }
         private void renewBasicDailyDataList(List<BasicDailyDataInformation> originalList, List<BasicDailyDataInformation> grabbedList)
         {
+            viewModel.acquiredData = BasicDailyDataInformation.ToTitle() + "\r\n";
             foreach (var currentBasicDailyData in grabbedList)
             {
                 int index = originalList.BinarySearch(currentBasicDailyData);
@@ -291,6 +202,27 @@ namespace AlphaS.BasicDailyData
             return result;
         }
 
+        private List<BasicDailyDataInformation> analysisDataJSON(List<List<string>> table)
+        {
+            List<BasicDailyDataInformation> result = new List<BasicDailyDataInformation>();
+            foreach (var row in table)
+            {
+                var toAdd = new BasicDailyDataInformation()
+                {
+                    date = row[0].getRidOfPostStar().getDateTimeFromStringMK(),
+                    dealedStock = row[1].getDecimalFromString(),
+                    volume = row[2].getDecimalFromString() ,
+                    open = row[3].getDecimalFromString(),
+                    high = row[4].getDecimalFromString(),
+                    low = row[5].getDecimalFromString(),
+                    close = row[6].getDecimalFromString(),
+                    change = row[7].getDecimalFromString(),
+                    dealedOrder = row[8].getDecimalFromString()
+                };
+                result.Add(toAdd);
+            }
+            return result;
+        }
         List<BasicDailyDataInformation> analysisDataTable(string tableInnerHTML)
         {
             string s = getContentFromtbody(tableInnerHTML);
@@ -363,10 +295,8 @@ namespace AlphaS.BasicDailyData
             }
             return result;
         }
-
-
-
-
+    
+        
         private void changeEnglishTyping()
         {
             foreach (InputLanguage language in InputLanguage.InstalledInputLanguages)
@@ -388,8 +318,7 @@ namespace AlphaS.BasicDailyData
             }
         }
 
-        private int totalMission = 0;
-        private void printMissionList()
+        private void printMissionList(int i)
         {
             viewModel.missionList = "currently ";
             if (currentMission != null)
@@ -401,19 +330,16 @@ namespace AlphaS.BasicDailyData
                 viewModel.missionList += "null\r\n";
             }
             viewModel.missionList += "--------------------------\r\n";
-            double percentage = totalMission != 0 ?
-                ((totalMission - missionList.Count) * 1.0 / totalMission * 100).round(4) : 0;
+            double percentage = missionList.Count != 0 ?
+                (100 - ((missionList.Count - i - 1) * 1.0 / missionList.Count * 100)).round(4) : 0;
 
-            viewModel.missionList += $"queue: {totalMission - missionList.Count} / {totalMission} ({percentage}%)\r\n";
+            viewModel.missionList += $"queue: {missionList.Count - i - 1} / {missionList.Count} ({percentage}%)\r\n";
 
             double elapsedTime = DateTime.Now.Subtract(missionStartTime).TotalSeconds.round(1);
             double estimatedTime = (elapsedTime * (100 - percentage) / percentage).round(1);
             viewModel.missionList += $"elapsed time: {elapsedTime.getTimeString()}, estimate time left: {estimatedTime.getTimeString()}\r\n";
 
-            for (int i = 0; i < 20 && i < missionList.Count; i++)
-            {
-                viewModel.missionList += missionList[i].ToString() + "\r\n";
-            }
+            viewModel.missionList += String.Join("\r\n", missionList.GetRange(i, Math.Min(20, missionList.Count - i)).Select(x => x.ToString()));
         }
 
     }

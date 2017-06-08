@@ -94,7 +94,7 @@ namespace AlphaS
 
         public static string getRidOfPostStar(this string input)
         {
-            return input.Replace("＊", "");
+            return input.Replace("＊", "").Replace("uff0a", "");
         }
 
         public static DateTime getDateTimeFromString(this string input)

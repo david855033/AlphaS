@@ -80,6 +80,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BasicDailyData\BStockDownloader\BStockDownloder.cs" />
     <Compile Include="BasicDailyData\IBasicDailyDataDownloader.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataFileStatusInformation.cs" />
     <Compile Include="BasicDailyData\BasicDailyDataInformation.cs" />
